@@ -43,12 +43,22 @@ if [[ -z "$IDENTITY" ]]; then
 fi
 
 if [[ -n "$IDENTITY" ]]; then
-    echo "==> Signing with Developer ID + hardened runtime:"
+    echo "==> Signing (inside-out) with Developer ID + hardened runtime:"
     echo "    $IDENTITY"
-    codesign --force --deep --timestamp \
-        --options runtime \
-        --entitlements entitlements.plist \
-        --sign "$IDENTITY" "$APP"
+    # `codesign --deep` silently skips some nested Mach-O binaries, which then
+    # fail notarization ("not signed with a valid Developer ID" / "no secure
+    # timestamp"). So sign every nested binary explicitly, deepest first, then
+    # seal the app bundle last.
+    #   1) all .so / .dylib libraries
+    find "$APP/Contents" -type f \( -name "*.so" -o -name "*.dylib" \) -print0 \
+        | xargs -0 codesign --force --timestamp --options runtime --sign "$IDENTITY"
+    #   2) nested frameworks (their internal Mach-O binaries)
+    while IFS= read -r -d '' fw; do
+        codesign --force --timestamp --options runtime --sign "$IDENTITY" "$fw"
+    done < <(find "$APP/Contents/Frameworks" -maxdepth 1 -name "*.framework" -type d -print0 2>/dev/null)
+    #   3) finally the whole app bundle, WITH entitlements (no --deep)
+    codesign --force --timestamp --options runtime \
+        --entitlements entitlements.plist --sign "$IDENTITY" "$APP"
     NOTARIZABLE=1
 else
     echo "==> No Developer ID cert found — ad-hoc signing (not notarizable)"
