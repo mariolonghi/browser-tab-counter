@@ -83,11 +83,19 @@ if [[ "$HAVE_NOTARY" == "1" ]]; then
     echo "==> Notarizing the app (this can take a few minutes)…"
     ZIP="dist/${APP_NAME}.zip"
     ditto -c -k --keepParent "$APP" "$ZIP"
-    xcrun notarytool submit "$ZIP" "${NOTARY_ARGS[@]}" --wait
+    SUBMIT_OUT="$(xcrun notarytool submit "$ZIP" "${NOTARY_ARGS[@]}" --wait 2>&1)" || true
+    echo "$SUBMIT_OUT"
     rm -f "$ZIP"
-    echo "==> Stapling ticket to the app"
-    xcrun stapler staple "$APP"
-    xcrun stapler validate "$APP" && echo "    app staple OK"
+    SUBMISSION_ID="$(printf '%s\n' "$SUBMIT_OUT" | awk '/id:/{print $2; exit}')"
+    if printf '%s\n' "$SUBMIT_OUT" | grep -q "status: Accepted"; then
+        echo "==> Stapling ticket to the app"
+        xcrun stapler staple "$APP"
+        xcrun stapler validate "$APP" && echo "    app staple OK"
+    else
+        echo "==> NOTARIZATION FAILED — fetching the detailed issue log:"
+        [[ -n "$SUBMISSION_ID" ]] && xcrun notarytool log "$SUBMISSION_ID" "${NOTARY_ARGS[@]}" || true
+        exit 1
+    fi
 fi
 
 # ----------------------------------------------------------------------------

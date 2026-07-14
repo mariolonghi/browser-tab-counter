@@ -17,6 +17,9 @@ OPTIONS = {
     "argv_emulation": False,          # menu-bar app; Carbon argv emulation not needed
     "includes": ["tabcount", "login_item", "appinfo", "permissions", "updates"],
     "packages": ["rumps", "certifi"],
+    # We never use tkinter; excluding it drops the Tcl/Tk frameworks (smaller
+    # bundle + fewer binaries for notarization to scrutinize).
+    "excludes": ["tkinter"],
     "plist": {
         "CFBundleName": "Browser Tab Counter",
         "CFBundleDisplayName": "Browser Tab Counter",
