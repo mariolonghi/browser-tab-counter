@@ -15,8 +15,8 @@ APP = ["app.py"]
 
 OPTIONS = {
     "argv_emulation": False,          # menu-bar app; Carbon argv emulation not needed
-    "includes": ["tabcount", "login_item", "appinfo", "permissions"],
-    "packages": ["rumps"],
+    "includes": ["tabcount", "login_item", "appinfo", "permissions", "updates"],
+    "packages": ["rumps", "certifi"],
     "plist": {
         "CFBundleName": "Browser Tab Counter",
         "CFBundleDisplayName": "Browser Tab Counter",

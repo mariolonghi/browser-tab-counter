@@ -18,6 +18,7 @@ import rumps
 import appinfo
 import login_item
 import permissions
+import updates
 from tabcount import BROWSERS, count_all, total_tabs
 
 POLL_SECONDS = appinfo.POLL_SECONDS
@@ -26,7 +27,7 @@ POLL_SECONDS = appinfo.POLL_SECONDS
 _METHOD = {b.name: b.method for b in BROWSERS}
 
 
-def build_about_text(counts) -> str:
+def build_about_text(counts, update_line: str | None = None) -> str:
     """Assemble the About/troubleshoot panel text from a list of BrowserCount."""
     inst = appinfo.install_date()
     inst_s = inst.strftime("%d %b %Y") if inst else "unknown"
@@ -44,11 +45,15 @@ def build_about_text(counts) -> str:
     if not perm_lines:
         perm_lines = ["   • (no supported browsers running)"]
 
+    version_block = f"Version {appinfo.VERSION}\n"
+    if update_line:
+        version_block += f"{update_line}\n"
+
     return (
-        f"Version {appinfo.VERSION}\n"
-        f"{appinfo.BUNDLE_ID}\n"
+        version_block
+        + f"{appinfo.BUNDLE_ID}\n"
         f"Installed: {inst_s}\n"
-        f"Updates every {appinfo.POLL_SECONDS}s\n"
+        f"Polls every {appinfo.POLL_SECONDS}s\n"
         "\n"
         "Browser permissions (Automation):\n"
         + "\n".join(perm_lines)
@@ -150,17 +155,32 @@ class TabCounterApp(rumps.App):
         permissions.open_automation_settings()
 
     def show_about(self, _sender) -> None:
-        result = rumps.alert(
-            title="Browser Tab Counter",
-            message=self._about_text(),
-            ok="OK",
-            other="Visit mariolonghi.com",
-        )
-        if result == -1:
-            permissions.open_website(appinfo.WEBSITE)
+        # User-initiated update check (short timeout; cached for a few minutes).
+        status = updates.check(timeout=3.0)
+        body = build_about_text(self._last_counts, update_line=status.summary())
 
-    def _about_text(self) -> str:
-        return build_about_text(self._last_counts)
+        if status.available:
+            # ok = download, cancel = close, other = website.
+            result = rumps.alert(
+                title="Browser Tab Counter",
+                message=body,
+                ok="Download update",
+                cancel="Close",
+                other="Visit mariolonghi.com",
+            )
+            if result == 1:
+                permissions.open_website(status.url)
+            elif result == -1:
+                permissions.open_website(appinfo.WEBSITE)
+        else:
+            result = rumps.alert(
+                title="Browser Tab Counter",
+                message=body,
+                ok="OK",
+                other="Visit mariolonghi.com",
+            )
+            if result == -1:
+                permissions.open_website(appinfo.WEBSITE)
 
     # ---- polling -----------------------------------------------------------
 

@@ -69,6 +69,12 @@ The menu → **About Browser Tab Counter** shows version, install date, poll
 interval, and each running browser's current permission status — handy when
 something isn't counting. It also links to the developer site, mariolonghi.com.
 
+**Update check.** Opening About checks GitHub Releases and tells you whether
+you're on the latest version; if a newer one exists you get a **Download update**
+button straight to the release. This runs only when you open About (not in the
+background), is a plain read-only request to GitHub — no personal data sent — and
+fails quietly if you're offline.
+
 ### ⭐ Launch at login (optional)
 
 Click the `⧉` menu → **Launch at Login** to toggle it on (a checkmark appears).
@@ -171,12 +177,13 @@ repository secrets.
 | `app.py` | rumps menu-bar app: polls, renders the number, About + Permissions menus |
 | `appinfo.py` | Shared metadata (version, bundle id, install date) — no heavy deps |
 | `permissions.py` | Re-trigger Automation prompts (`tccutil`) + open settings pane |
+| `updates.py` | Check GitHub Releases for a newer version (certifi-backed HTTPS) |
 | `login_item.py` | Launch-at-login toggle (per-user LaunchAgent) |
 | `setup.py` | py2app bundle config (`LSUIElement`, Automation usage string) |
 | `entitlements.plist` | Hardened-runtime entitlements (for Developer ID / notarization) |
 | `build_dmg.sh` | Build → sign (Developer ID *or* ad-hoc) → `.dmg` → optional notarize |
 | `test_firefox_counting.py` | Regression tests for multi-window / multi-profile counting |
-| `requirements.txt` | Runtime dep (`rumps`) |
+| `requirements.txt` | Runtime deps (`rumps`, `certifi`) |
 
 ---
 

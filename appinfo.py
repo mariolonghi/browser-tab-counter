@@ -11,11 +11,15 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-VERSION = "0.2.1"
+VERSION = "0.3.0"
 APP_NAME = "Browser Tab Counter"
 BUNDLE_ID = "com.mariolonghi.browsertabcounter"
 WEBSITE = "https://mariolonghi.com"
 POLL_SECONDS = 4
+
+# Update checks (About panel) point at the GitHub Releases of this repo.
+GITHUB_REPO = "mariolonghi/browser-tab-counter"
+RELEASES_URL = f"https://github.com/{GITHUB_REPO}/releases/latest"
 
 
 def is_frozen() -> bool:
