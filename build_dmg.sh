@@ -52,6 +52,9 @@ if [[ -n "$IDENTITY" ]]; then
     #   1) all .so / .dylib libraries
     find "$APP/Contents" -type f \( -name "*.so" -o -name "*.dylib" \) -print0 \
         | xargs -0 codesign --force --timestamp --options runtime --sign "$IDENTITY"
+    #   1b) executables in MacOS/ (main binary + py2app's secondary `python`)
+    find "$APP/Contents/MacOS" -type f -print0 \
+        | xargs -0 codesign --force --timestamp --options runtime --sign "$IDENTITY"
     #   2) nested frameworks (their internal Mach-O binaries)
     while IFS= read -r -d '' fw; do
         codesign --force --timestamp --options runtime --sign "$IDENTITY" "$fw"
