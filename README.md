@@ -10,14 +10,24 @@ per-browser breakdown. No admin rights, no browser extension.
 Design dossier (the "why" and the plan) lives at
 `~/Documents/MLonghi/Project-1/Browser Tab Counter/`.
 
-## What works in this POC
+## What works
 
-- Sums open tabs across **running** Safari + Chromium-family browsers
-  (Chrome, Edge, Brave, Vivaldi, Opera, Arc) via AppleScript.
+- Sums open tabs across **running** browsers:
+  - **Safari + Chromium family** (Chrome/Beta/Canary, Chromium, Edge, Brave,
+    Vivaldi, Opera, Opera GX, Arc, Sidekick, Yandex) via AppleScript.
+  - **Firefox** (+ LibreWolf, Waterfox, Zen) via session-file parse — no
+    AppleScript API exists, so we decode its `mozLz4` `recovery.jsonlz4` with a
+    small pure-Python LZ4 decompressor (no third-party deps).
 - Menu-bar number, updated every few seconds.
 - Click → dropdown with per-browser counts, "Refresh now", and Quit.
 - Only queries browsers that are actually running (never launches a closed one).
-- Firefox is **out of scope** for the POC (no usable tab-scripting API — see dossier).
+
+## ⚠️ Distribution note (Firefox + App Store)
+
+The Firefox counter reads a file in the user's Firefox profile. That's fine for a
+**drag-to-install (notarized)** build, but a **Mac App Store** build must be
+sandboxed and **cannot read Firefox's files** — so an App Store edition would be
+Safari + Chromium only. Full analysis: dossier `distribution.md`.
 
 ## Requirements
 
@@ -61,7 +71,7 @@ was denied; re-enable it in that Privacy pane.
 
 | File | Purpose |
 |------|---------|
-| `tabcount.py` | UI-free tab-counting logic (also a CLI) |
+| `tabcount.py` | UI-free tab-counting logic (AppleScript + Firefox mozLz4 parse); also a CLI |
 | `app.py` | rumps menu-bar app that polls and renders the number |
 | `requirements.txt` | Python deps (`rumps`) |
 
