@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import rumps
 
+import login_item
 from tabcount import count_all, total_tabs
 
 POLL_SECONDS = 4
@@ -42,7 +43,18 @@ class TabCounterApp(rumps.App):
                 self.menu.add(rumps.MenuItem(f"{c.name}:  {value}"))
         self.menu.add(rumps.separator)
         self.menu.add(rumps.MenuItem("Refresh now", callback=self.refresh))
+        login = rumps.MenuItem("Launch at Login", callback=self.toggle_login)
+        login.state = 1 if login_item.is_enabled() else 0
+        self.menu.add(login)
         self.menu.add(rumps.MenuItem("Quit", callback=rumps.quit_application))
+
+    def toggle_login(self, sender) -> None:
+        try:
+            now_on = login_item.toggle()
+        except Exception as exc:  # noqa: BLE001 - surface, don't crash the menu bar
+            rumps.alert("Launch at Login", f"Couldn't update setting:\n{exc}")
+            return
+        sender.state = 1 if now_on else 0
 
     def refresh(self, _sender=None) -> None:
         counts = count_all()

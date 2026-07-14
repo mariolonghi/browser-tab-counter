@@ -1,0 +1,39 @@
+name: Build & release DMG
+
+# Push a tag like v0.1.0 to build the .app, package a .dmg, and attach it to
+# the matching GitHub Release.
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-14   # Apple Silicon runner
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt py2app
+
+      - name: Build .dmg
+        run: |
+          # build_dmg.sh expects ./.venv/bin/python; point it at the CI python.
+          mkdir -p .venv/bin
+          ln -sf "$(command -v python)" .venv/bin/python
+          ./build_dmg.sh
+
+      - name: Upload DMG to the release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*.dmg
+          fail_on_unmatched_files: true
