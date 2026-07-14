@@ -11,17 +11,20 @@ per-browser breakdown. No admin rights, no browser extension, no account.
 menu bar:  … ⧉ 8  🔋  🔎  Wed 16:32
               └─ click ─┐
                         ▼
-              ┌───────────────────┐
-              │ 8 tab(s) total    │
-              ├───────────────────┤
-              │ Safari:         2 │
-              │ Microsoft Edge: 4 │
-              │ Firefox:        2 │
-              ├───────────────────┤
-              │ Refresh now       │
-              │ ✓ Launch at Login │
-              │ Quit              │
-              └───────────────────┘
+              ┌────────────────────────┐
+              │ 8 tab(s) total         │
+              ├────────────────────────┤
+              │ Safari:              2 │
+              │ Microsoft Edge:      4 │
+              │ Firefox:             2 │
+              ├────────────────────────┤
+              │ Refresh now            │
+              │ Permissions          ▸ │
+              │ ✓ Launch at Login      │
+              ├────────────────────────┤
+              │ About Browser Tab Cou… │
+              │ Quit                   │
+              └────────────────────────┘
 ```
 
 ---
@@ -51,11 +54,20 @@ The first time the app reads each browser, macOS shows an **Automation** pop-up:
 Edge, …). This is a normal per-user permission — **not** an administrator action,
 and the app only ever *counts* tabs, it never reads their content.
 
-- If you accidentally clicked *Don't Allow*, re-enable it under
-  **System Settings → Privacy & Security → Automation → Browser Tab Counter**.
+- **Clicked *Don't Allow* or missed a prompt?** Use the menu →
+  **Permissions → Re-request browser permissions**. It clears the previous
+  decision (via `tccutil`) and asks again. There's also
+  **Permissions → Open Automation settings…** to jump straight to
+  *System Settings → Privacy & Security → Automation → Browser Tab Counter*.
 - A browser showing `— (permission?)` in the dropdown just means its Automation
   permission is still off.
 - **Firefox needs no pop-up** — it's counted by reading its own session file.
+
+### ℹ️ About / troubleshoot
+
+The menu → **About Browser Tab Counter** shows version, install date, poll
+interval, and each running browser's current permission status — handy when
+something isn't counting. It also links to the developer site, mariolonghi.com.
 
 ### ⭐ Launch at login (optional)
 
@@ -113,10 +125,41 @@ Or just the counter in the terminal (handy for testing):
 ./build_dmg.sh          # → dist/BrowserTabCounter-<version>.dmg
 ```
 
-The build ad-hoc signs the app (required to run on Apple Silicon). It is **not**
-notarized, which is why users need the one-time right-click → Open step. To ship
-without that step you'd enrol in the paid Apple Developer Program and add
-`codesign` (Developer ID) + `notarytool` steps.
+`build_dmg.sh` signs **automatically**:
+
+- **No Developer ID cert** → ad-hoc signature (runs on Apple Silicon, but users
+  need the one-time right-click → Open).
+- **Developer ID Application cert present** → signs with it + the **hardened
+  runtime** + `entitlements.plist`, making the app **notarizable**.
+
+### Signing & notarizing with a paid Apple Developer account
+
+A paid membership lets you remove the scary first-launch step entirely. One-time
+setup:
+
+1. **Create the right certificate.** You need a **"Developer ID Application"**
+   cert — *not* the "Apple Development" cert Xcode makes by default (that one
+   can't be notarized). In **Xcode → Settings → Accounts → Manage Certificates →
+   `+` → Developer ID Application**, or via the Apple Developer portal. It lands
+   in your keychain; `build_dmg.sh` auto-detects it.
+2. **Store notarization credentials once** (needs Xcode installed for
+   `notarytool`):
+   ```bash
+   xcrun notarytool store-credentials btc-notary \
+     --apple-id "you@example.com" --team-id "TEAMID" \
+     --password "app-specific-password"   # from appleid.apple.com
+   ```
+3. **Build + sign + notarize + staple** in one go:
+   ```bash
+   NOTARY_PROFILE=btc-notary ./build_dmg.sh
+   ```
+   (Or pass `NOTARY_APPLE_ID` / `NOTARY_TEAM_ID` / `NOTARY_PASSWORD` instead of a
+   stored profile.) The script signs with Developer ID, uploads for
+   notarization, waits, and staples the ticket to the `.dmg` — after which
+   users can just double-click to open.
+
+The same env vars work in the GitHub Actions release workflow if you add them as
+repository secrets.
 
 ---
 
@@ -125,10 +168,13 @@ without that step you'd enrol in the paid Apple Developer Program and add
 | File | Purpose |
 |------|---------|
 | `tabcount.py` | UI-free tab-counting logic (AppleScript + Firefox mozLz4 parse); also a CLI |
-| `app.py` | rumps menu-bar app that polls and renders the number |
+| `app.py` | rumps menu-bar app: polls, renders the number, About + Permissions menus |
+| `appinfo.py` | Shared metadata (version, bundle id, install date) — no heavy deps |
+| `permissions.py` | Re-trigger Automation prompts (`tccutil`) + open settings pane |
 | `login_item.py` | Launch-at-login toggle (per-user LaunchAgent) |
 | `setup.py` | py2app bundle config (`LSUIElement`, Automation usage string) |
-| `build_dmg.sh` | One-shot build → ad-hoc sign → `.dmg` |
+| `entitlements.plist` | Hardened-runtime entitlements (for Developer ID / notarization) |
+| `build_dmg.sh` | Build → sign (Developer ID *or* ad-hoc) → `.dmg` → optional notarize |
 | `requirements.txt` | Runtime dep (`rumps`) |
 
 ---

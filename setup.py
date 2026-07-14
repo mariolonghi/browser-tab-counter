@@ -9,18 +9,20 @@ Or use ./build_dmg.sh to produce a distributable .dmg.
 
 from setuptools import setup
 
+import appinfo
+
 APP = ["app.py"]
 
 OPTIONS = {
     "argv_emulation": False,          # menu-bar app; Carbon argv emulation not needed
-    "includes": ["tabcount", "login_item"],
+    "includes": ["tabcount", "login_item", "appinfo", "permissions"],
     "packages": ["rumps"],
     "plist": {
         "CFBundleName": "Browser Tab Counter",
         "CFBundleDisplayName": "Browser Tab Counter",
-        "CFBundleIdentifier": "com.mariolonghi.browsertabcounter",
-        "CFBundleVersion": "0.1.0",
-        "CFBundleShortVersionString": "0.1.0",
+        "CFBundleIdentifier": appinfo.BUNDLE_ID,
+        "CFBundleVersion": appinfo.VERSION,
+        "CFBundleShortVersionString": appinfo.VERSION,
         "LSUIElement": True,          # menu-bar only, no Dock icon / no app window
         "LSMinimumSystemVersion": "11.0",
         "NSHumanReadableCopyright": "© 2026 Mario Longhi",

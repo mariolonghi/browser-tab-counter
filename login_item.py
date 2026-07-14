@@ -16,7 +16,9 @@ import subprocess
 import sys
 from pathlib import Path
 
-LABEL = "com.mariolonghi.browsertabcounter"
+from appinfo import BUNDLE_ID
+
+LABEL = BUNDLE_ID
 PLIST_PATH = Path.home() / "Library" / "LaunchAgents" / f"{LABEL}.plist"
 
 
