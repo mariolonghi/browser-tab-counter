@@ -175,14 +175,29 @@ repository secrets.
 | `setup.py` | py2app bundle config (`LSUIElement`, Automation usage string) |
 | `entitlements.plist` | Hardened-runtime entitlements (for Developer ID / notarization) |
 | `build_dmg.sh` | Build → sign (Developer ID *or* ad-hoc) → `.dmg` → optional notarize |
+| `test_firefox_counting.py` | Regression tests for multi-window / multi-profile counting |
 | `requirements.txt` | Runtime dep (`rumps`) |
 
 ---
 
 ## Notes & limitations
 
-- **Firefox count can lag ~15 s** — Firefox rewrites its session file on a timer,
-  so newly opened/closed Firefox tabs take a moment to reflect.
+**How Firefox counting works & its caveats.** Firefox has no tab-scripting API,
+so tabs are counted by reading its `sessionstore` files (windows × tabs, summed).
+That's accurate for normal multi-window use and now sums across **multiple open
+profiles**, but two limits are inherent to the approach:
+
+- **~15 s lag.** Firefox only rewrites its session file on a timer (and pauses
+  when idle), so a tab you just opened/closed takes a few seconds to show up. The
+  count is right once Firefox next saves.
+- **Private windows aren't counted.** Firefox deliberately never writes private
+  browsing windows to disk, so their tabs are invisible to any external counter.
+- Session restore must be enabled (the default). If a profile is set to never
+  save history/session, its tabs can't be read.
+
+Chromium/Safari counts (via AppleScript) don't have these caveats — they're
+real-time. If you need Firefox to be real-time too, that requires the macOS
+Accessibility API (an extra permission + fragile UI parsing) — not currently done.
 - **No Mac App Store build.** The App Store requires sandboxing, which blocks
   reading Firefox's session file (and realistically needs a native Swift rewrite).
   This project targets **drag-to-install** only. Design rationale lives in the

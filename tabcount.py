@@ -176,32 +176,85 @@ def _read_mozlz4(path: Path) -> bytes:
     return _lz4_decompress_block(data[12:], expected)
 
 
-def _firefox_session_file(app_support: str) -> Path | None:
-    """Most recently updated sessionstore for a Firefox-family profile."""
+def _firefox_profile_dirs(app_support: str) -> list[Path]:
     base = Path.home() / "Library" / "Application Support" / app_support / "Profiles"
     if not base.exists():
-        return None
-    # While running, recovery.jsonlz4 is the live file; fall back to the
-    # on-close sessionstore.jsonlz4.
-    candidates = list(base.glob("*/sessionstore-backups/recovery.jsonlz4"))
-    candidates += list(base.glob("*/sessionstore.jsonlz4"))
-    if not candidates:
-        return None
-    return max(candidates, key=lambda p: p.stat().st_mtime)
+        return []
+    return [p for p in base.iterdir() if p.is_dir()]
+
+
+def _profile_is_open(profile_dir: Path) -> bool:
+    """A Firefox profile currently in use holds a lock file.
+
+    macOS Firefox writes `.parentlock` (and a `lock` symlink) while the profile
+    is open, and removes them on clean shutdown. This is how we tell which
+    profiles are actually running — more reliable than the session-file mtime,
+    which stops updating when an open Firefox goes idle.
+    """
+    return (profile_dir / ".parentlock").exists() or (profile_dir / "lock").exists()
+
+
+def _read_firefox_session(profile_dir: Path) -> dict | None:
+    """Decode the freshest usable session store for one profile.
+
+    Tries the live recovery file first, then its backup (in case we catch a
+    write in progress), then the on-close sessionstore.
+    """
+    candidates = [
+        profile_dir / "sessionstore-backups" / "recovery.jsonlz4",
+        profile_dir / "sessionstore-backups" / "recovery.baklz4",
+        profile_dir / "sessionstore.jsonlz4",
+    ]
+    for f in candidates:
+        if not f.exists():
+            continue
+        try:
+            return json.loads(_read_mozlz4(f))
+        except Exception:  # noqa: BLE001 - truncated/odd file, try the next candidate
+            continue
+    return None
+
+
+def _count_session_tabs(data: dict) -> int:
+    """Sum tabs across every window in one profile's session data.
+
+    Note: private-browsing windows are intentionally absent from the session
+    store (Firefox never persists them), so their tabs cannot be counted here.
+    """
+    return sum(len(w.get("tabs", [])) for w in data.get("windows", []))
 
 
 def _count_via_firefox(app_support: str) -> tuple[int | None, str | None]:
-    path = _firefox_session_file(app_support)
-    if path is None:
-        return None, "no session file"
-    try:
-        raw = _read_mozlz4(path)
-        data = json.loads(raw)
-    except Exception as exc:  # noqa: BLE001 - report, don't crash the menu bar
-        return None, f"{type(exc).__name__}: {exc}"
+    """Total Firefox tabs, summed across every *open* profile.
+
+    A user can run several profiles at once; each has its own session store, so
+    we sum them. Falls back to the single most-recently-written session when no
+    open profile can be identified (e.g. lock file missing on an odd setup).
+    """
+    profiles = _firefox_profile_dirs(app_support)
+    if not profiles:
+        return None, "no profiles"
+
+    targets = [p for p in profiles if _profile_is_open(p)]
+    if not targets:
+        newest = None
+        for p in profiles:
+            rec = p / "sessionstore-backups" / "recovery.jsonlz4"
+            if rec.exists():
+                mtime = rec.stat().st_mtime
+                if newest is None or mtime > newest[1]:
+                    newest = (p, mtime)
+        targets = [newest[0]] if newest else []
+
     total = 0
-    for w in data.get("windows", []):
-        total += len(w.get("tabs", []))
+    read_any = False
+    for p in targets:
+        data = _read_firefox_session(p)
+        if data is not None:
+            total += _count_session_tabs(data)
+            read_any = True
+    if not read_any:
+        return None, "no readable session file"
     return total, None
 
 
