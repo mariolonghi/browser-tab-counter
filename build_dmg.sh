@@ -58,7 +58,40 @@ fi
 codesign --verify --deep --strict "$APP" && echo "    signature OK"
 
 # ----------------------------------------------------------------------------
-# Package DMG
+# Resolve notary credentials (if any)
+# ----------------------------------------------------------------------------
+NOTARY_ARGS=()
+HAVE_NOTARY=0
+if [[ "$NOTARIZABLE" == "1" ]]; then
+    if [[ -n "${NOTARY_PROFILE:-}" ]]; then
+        NOTARY_ARGS=(--keychain-profile "$NOTARY_PROFILE"); HAVE_NOTARY=1
+    elif [[ -n "${NOTARY_APPLE_ID:-}" && -n "${NOTARY_TEAM_ID:-}" && -n "${NOTARY_PASSWORD:-}" ]]; then
+        NOTARY_ARGS=(--apple-id "$NOTARY_APPLE_ID" --team-id "$NOTARY_TEAM_ID" --password "$NOTARY_PASSWORD")
+        HAVE_NOTARY=1
+    fi
+    if [[ "$HAVE_NOTARY" == "1" ]] && ! xcrun --find notarytool >/dev/null 2>&1; then
+        echo "==> WARNING: notarytool not found (install full Xcode). Skipping notarization."
+        HAVE_NOTARY=0
+    fi
+fi
+
+# ----------------------------------------------------------------------------
+# Notarize + staple the APP itself (so the ticket travels with it — works even
+# on a first launch while offline). notarytool takes a zip, not a bare .app.
+# ----------------------------------------------------------------------------
+if [[ "$HAVE_NOTARY" == "1" ]]; then
+    echo "==> Notarizing the app (this can take a few minutes)…"
+    ZIP="dist/${APP_NAME}.zip"
+    ditto -c -k --keepParent "$APP" "$ZIP"
+    xcrun notarytool submit "$ZIP" "${NOTARY_ARGS[@]}" --wait
+    rm -f "$ZIP"
+    echo "==> Stapling ticket to the app"
+    xcrun stapler staple "$APP"
+    xcrun stapler validate "$APP" && echo "    app staple OK"
+fi
+
+# ----------------------------------------------------------------------------
+# Package DMG (from the now-stapled app)
 # ----------------------------------------------------------------------------
 echo "==> Staging DMG layout"
 STAGE="dist/dmg-stage"
@@ -71,30 +104,13 @@ rm -f "$DMG_PATH"
 hdiutil create -volname "$APP_NAME" -srcfolder "$STAGE" -ov -format UDZO "$DMG_PATH" >/dev/null
 rm -rf "$STAGE"
 
-# ----------------------------------------------------------------------------
-# Notarize + staple (optional)
-# ----------------------------------------------------------------------------
-notarize=0
-if [[ "$NOTARIZABLE" == "1" ]]; then
-    if [[ -n "${NOTARY_PROFILE:-}" ]]; then
-        NOTARY_ARGS=(--keychain-profile "$NOTARY_PROFILE"); notarize=1
-    elif [[ -n "${NOTARY_APPLE_ID:-}" && -n "${NOTARY_TEAM_ID:-}" && -n "${NOTARY_PASSWORD:-}" ]]; then
-        NOTARY_ARGS=(--apple-id "$NOTARY_APPLE_ID" --team-id "$NOTARY_TEAM_ID" --password "$NOTARY_PASSWORD"); notarize=1
-    fi
-fi
-
-if [[ "$notarize" == "1" ]]; then
-    if ! xcrun --find notarytool >/dev/null 2>&1; then
-        echo "==> WARNING: notarytool not found (install Xcode). Skipping notarization."
-    else
-        echo "==> Notarizing (this can take a few minutes)…"
-        xcrun notarytool submit "$DMG_PATH" "${NOTARY_ARGS[@]}" --wait
-        echo "==> Stapling ticket to the DMG"
-        xcrun stapler staple "$DMG_PATH"
-        xcrun stapler validate "$DMG_PATH" && echo "    staple OK"
-    fi
+if [[ "$HAVE_NOTARY" == "1" ]]; then
+    echo "==> Stapling the DMG too"
+    xcrun stapler staple "$DMG_PATH" && echo "    dmg staple OK" || echo "    (dmg staple skipped)"
+elif [[ "$NOTARIZABLE" == "1" ]]; then
+    echo "==> NOTE: signed with Developer ID but NOT notarized (no notary creds)."
 else
-    echo "==> Notarization skipped (no credentials, or ad-hoc build)."
+    echo "==> NOTE: ad-hoc build — users need right-click -> Open on first launch."
 fi
 
 echo "==> Done: ${DMG_PATH}"

@@ -164,8 +164,40 @@ setup:
    notarization, waits, and staples the ticket to the `.dmg` — after which
    users can just double-click to open.
 
-The same env vars work in the GitHub Actions release workflow if you add them as
-repository secrets.
+### Notarized releases via GitHub Actions
+
+`.github/workflows/release.yml` builds, **signs, notarizes, staples and
+publishes** a DMG whenever you push a `v*` tag — once these five repo secrets are
+set. (Without them it still builds an ad-hoc DMG.)
+
+**1. Export your Developer ID cert as a `.p12`** (from the Mac that has it):
+Keychain Access → **login** keychain → **My Certificates** → expand
+*Developer ID Application: Mario Longhi* so both the certificate **and its
+private key** are selected → right-click → **Export 2 items…** → save
+`DeveloperID.p12` and set an export password. Then base64-encode it:
+```bash
+base64 -i DeveloperID.p12 | pbcopy      # now on your clipboard
+```
+
+**2. Create an app-specific password** at
+appleid.apple.com → *Sign-In and Security → App-Specific Passwords*.
+
+**3. Set the secrets** (run these yourself — the values never leave your machine):
+```bash
+gh secret set MACOS_CERT_P12_BASE64   # paste the base64 from step 1
+gh secret set MACOS_CERT_PASSWORD     # the .p12 export password from step 1
+gh secret set NOTARY_APPLE_ID         # your Apple ID email
+gh secret set NOTARY_TEAM_ID          # ZWXAL8XA46
+gh secret set NOTARY_PASSWORD         # the app-specific password from step 2
+```
+
+**4. Release:** bump `VERSION` in `appinfo.py`, commit, then:
+```bash
+git tag v0.3.1 && git push origin v0.3.1
+```
+The workflow imports the cert into a throwaway keychain, runs `build_dmg.sh`
+(Developer ID sign → notarize → staple), and uploads the DMG to the release —
+which then opens with a **plain double-click**.
 
 ---
 

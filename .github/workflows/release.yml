@@ -1,7 +1,18 @@
 name: Build & release DMG
 
-# Push a tag like v0.1.0 to build the .app, package a .dmg, and attach it to
-# the matching GitHub Release.
+# Push a tag like v0.3.1 to build the .app, sign + notarize, package a .dmg,
+# and attach it to the matching GitHub Release.
+#
+# Signing/notarization runs only when the repository secrets below are set;
+# without them the build still produces an (ad-hoc, un-notarized) DMG.
+#
+#   Secrets required for a notarized build
+#   --------------------------------------
+#   MACOS_CERT_P12_BASE64   base64 of your exported "Developer ID Application" .p12
+#   MACOS_CERT_PASSWORD     the password you set when exporting that .p12
+#   NOTARY_APPLE_ID         your Apple ID email
+#   NOTARY_TEAM_ID          ZWXAL8XA46
+#   NOTARY_PASSWORD         an app-specific password (appleid.apple.com)
 on:
   push:
     tags:
@@ -12,7 +23,9 @@ permissions:
 
 jobs:
   build:
-    runs-on: macos-14   # Apple Silicon runner
+    runs-on: macos-14   # Apple Silicon runner, ships with Xcode (notarytool)
+    env:
+      MACOS_CERT_P12_BASE64: ${{ secrets.MACOS_CERT_P12_BASE64 }}
     steps:
       - uses: actions/checkout@v4
 
@@ -25,7 +38,35 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt py2app
 
-      - name: Build .dmg
+      - name: Import Developer ID certificate
+        if: env.MACOS_CERT_P12_BASE64 != ''
+        env:
+          MACOS_CERT_PASSWORD: ${{ secrets.MACOS_CERT_PASSWORD }}
+        run: |
+          set -euo pipefail
+          CERT_PATH="$RUNNER_TEMP/developer_id.p12"
+          KEYCHAIN_PATH="$RUNNER_TEMP/app-signing.keychain-db"
+          KEYCHAIN_PW="$(python -c 'import secrets; print(secrets.token_hex(16))')"
+
+          echo "$MACOS_CERT_P12_BASE64" | base64 --decode > "$CERT_PATH"
+
+          security create-keychain -p "$KEYCHAIN_PW" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PW" "$KEYCHAIN_PATH"
+          security import "$CERT_PATH" -P "$MACOS_CERT_PASSWORD" \
+            -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+          security set-key-partition-list -S apple-tool:,apple: \
+            -k "$KEYCHAIN_PW" "$KEYCHAIN_PATH" >/dev/null
+          # Make our keychain the one codesign/find-identity search.
+          security list-keychain -d user -s "$KEYCHAIN_PATH"
+          echo "Signing identities available:"
+          security find-identity -v -p codesigning "$KEYCHAIN_PATH"
+
+      - name: Build, sign, notarize & package DMG
+        env:
+          NOTARY_APPLE_ID: ${{ secrets.NOTARY_APPLE_ID }}
+          NOTARY_TEAM_ID: ${{ secrets.NOTARY_TEAM_ID }}
+          NOTARY_PASSWORD: ${{ secrets.NOTARY_PASSWORD }}
         run: |
           # build_dmg.sh expects ./.venv/bin/python; point it at the CI python.
           mkdir -p .venv/bin
