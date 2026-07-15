@@ -125,6 +125,14 @@ rm -f "$DMG_PATH"
 hdiutil create -volname "$APP_NAME" -srcfolder "$STAGE" -ov -format UDZO "$DMG_PATH" >/dev/null
 rm -rf "$STAGE"
 
+# Code-sign the DMG itself. Notarizing without this leaves the .dmg "not signed
+# at all", so Gatekeeper rejects the download ("no usable signature") even
+# though a ticket is stapled. Signing must happen BEFORE notarization.
+if [[ "$NOTARIZABLE" == "1" ]]; then
+    echo "==> Signing the DMG"
+    codesign --force --timestamp --sign "$IDENTITY" "$DMG_PATH"
+fi
+
 # ----------------------------------------------------------------------------
 # Notarize + staple the DMG itself, so the downloaded .dmg also opens cleanly
 # (the app-staple above covers the app once installed; this covers the download).
