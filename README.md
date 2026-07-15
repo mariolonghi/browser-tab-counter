@@ -8,7 +8,7 @@ It shows a single number near the clock (e.g. `⧉ 147`). Click it for a
 per-browser breakdown. No admin rights, no browser extension, no account.
 
 ```
-menu bar:  … ⧉ 8  🔋  🔎  Wed 16:32     (⚠️ 8 when over your alert threshold)
+menu bar:  … ⧉ 8  🔋  🔎  Wed 16:32     (⧉ ⚠️ 8 when over your alert threshold)
               └─ click ─┐
                         ▼
               ┌──────────────────────────────────┐
@@ -79,9 +79,9 @@ fails quietly if you're offline.
 ### ⚠️ Alert threshold (optional)
 
 Menu → **Alert threshold** lets you pick a number. When your total goes **above**
-it, the menu-bar indicator switches from `⧉` to **`⚠️`** and you get a single
-notification (it re-arms once the count drops back below). Enter **0** to turn it
-off. Your choice is saved locally.
+it, the menu-bar indicator adds a **`⚠️`** (so it reads `⧉ ⚠️ N`) and you get a
+single notification (it re-arms once the count drops back below). Enter **0** to
+turn it off. Your choice is saved locally.
 
 ### 📈 Tabs over time
 
@@ -95,11 +95,6 @@ The app samples the total every few minutes into a small, capped local file
 Click the `⧉` menu → **Launch at Login** to toggle it on (a checkmark appears).
 The app will start automatically each time you log in. Toggle again to turn off.
 No admin required — it uses a per-user LaunchAgent.
-
-### 🔒 Your data
-
-Everything stays on your Mac in `~/Library/Application Support/BrowserTabCounter/`
-(`prefs.json`, `history.csv`). No cloud, no account, no telemetry.
 
 ### Quit
 
@@ -120,7 +115,9 @@ never launched just to count it.
 
 ---
 
-## Build from source
+## The technical stuff
+
+### Build from source
 
 Requirements: macOS, Python **3.9+** (system `/usr/bin/python3` 3.8 is too old
 for PyObjC/rumps — use Homebrew's `python3.13`).
@@ -132,96 +129,25 @@ cd browser-tab-counter
 ./.venv/bin/pip install -r requirements.txt
 ```
 
-Run the menu-bar app:
+Run the menu-bar app, or just the counter in the terminal (handy for testing):
 
 ```bash
 ./.venv/bin/python app.py
-```
-
-Or just the counter in the terminal (handy for testing):
-
-```bash
 ./.venv/bin/python tabcount.py
 ```
 
-### Build the distributable `.dmg`
+Build the distributable `.dmg`:
 
 ```bash
 ./.venv/bin/pip install py2app
 ./build_dmg.sh          # → dist/BrowserTabCounter-<version>.dmg
 ```
 
-`build_dmg.sh` signs **automatically**:
+`build_dmg.sh` signs with a Developer ID certificate if one is present (and can
+notarize + staple the result), otherwise it falls back to an ad-hoc signature.
+**If you need info on signing and notarizing, reach out.**
 
-- **No Developer ID cert** → ad-hoc signature (runs on Apple Silicon, but users
-  need the one-time right-click → Open).
-- **Developer ID Application cert present** → signs with it + the **hardened
-  runtime** + `entitlements.plist`, making the app **notarizable**.
-
-### Signing & notarizing with a paid Apple Developer account
-
-A paid membership lets you remove the scary first-launch step entirely. One-time
-setup:
-
-1. **Create the right certificate.** You need a **"Developer ID Application"**
-   cert — *not* the "Apple Development" cert Xcode makes by default (that one
-   can't be notarized). In **Xcode → Settings → Accounts → Manage Certificates →
-   `+` → Developer ID Application**, or via the Apple Developer portal. It lands
-   in your keychain; `build_dmg.sh` auto-detects it.
-2. **Store notarization credentials once** (needs Xcode installed for
-   `notarytool`):
-   ```bash
-   xcrun notarytool store-credentials btc-notary \
-     --apple-id "you@example.com" --team-id "TEAMID" \
-     --password "app-specific-password"   # from appleid.apple.com
-   ```
-3. **Build + sign + notarize + staple** in one go:
-   ```bash
-   NOTARY_PROFILE=btc-notary ./build_dmg.sh
-   ```
-   (Or pass `NOTARY_APPLE_ID` / `NOTARY_TEAM_ID` / `NOTARY_PASSWORD` instead of a
-   stored profile.) The script signs with Developer ID, uploads for
-   notarization, waits, and staples the ticket to the `.dmg` — after which
-   users can just double-click to open.
-
-### Notarized releases via GitHub Actions
-
-`.github/workflows/release.yml` builds, **signs, notarizes, staples and
-publishes** a DMG whenever you push a `v*` tag — once these five repo secrets are
-set. (Without them it still builds an ad-hoc DMG.)
-
-**1. Export your Developer ID cert as a `.p12`** (from the Mac that has it):
-Keychain Access → **login** keychain → **My Certificates** → expand
-*Developer ID Application: Mario Longhi* so both the certificate **and its
-private key** are selected → right-click → **Export 2 items…** → save
-`DeveloperID.p12` and set an export password. Then base64-encode it:
-```bash
-base64 -i DeveloperID.p12 | pbcopy      # now on your clipboard
-```
-
-**2. Create an app-specific password** at
-appleid.apple.com → *Sign-In and Security → App-Specific Passwords*.
-
-**3. Set the secrets** (run these yourself — the values never leave your machine):
-```bash
-gh secret set MACOS_CERT_P12_BASE64   # paste the base64 from step 1
-gh secret set MACOS_CERT_PASSWORD     # the .p12 export password from step 1
-gh secret set NOTARY_APPLE_ID         # your Apple ID email
-gh secret set NOTARY_TEAM_ID          # ZWXAL8XA46
-gh secret set NOTARY_PASSWORD         # the app-specific password from step 2
-```
-
-**4. Release:** bump `VERSION` in `appinfo.py`, commit, then:
-```bash
-git tag v0.3.1 && git push origin v0.3.1
-```
-The workflow imports the cert into a throwaway keychain, runs `build_dmg.sh`
-(Developer ID sign → notarize → staple), and uploads the DMG to the release —
-which then opens with a **plain double-click**.
-
----
-
-## Project layout
+### Project layout
 
 | File | Purpose |
 |------|---------|
@@ -264,6 +190,16 @@ Accessibility API (an extra permission + fragile UI parsing) — not currently d
   This project targets **drag-to-install** only. Design rationale lives in the
   dossier under `~/Documents/MLonghi/Project-1/Browser Tab Counter/distribution.md`.
 - The design dossier (the "why") is kept separately from this code repo.
+
+## Disclaimer
+
+- **Privacy.** Once installed on your system, this app does not send any
+  information to the internet. No cloud linkage, no account needed, no telemetry.
+  Your settings and the tab-history log stay on your Mac in
+  `~/Library/Application Support/BrowserTabCounter/`.
+  *(The only network use is the optional update check, which runs only when you
+  open the About window — a read-only request to GitHub, no personal data.)*
+- **Support.** The app is provided free to use, with limited support.
 
 ## License
 

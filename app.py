@@ -248,10 +248,11 @@ class TabCounterApp(rumps.App):
         self._last_counts = counts
         total = total_tabs(counts)
 
-        # Threshold alert: emoji swap + one-time notification on upward crossing.
+        # Threshold alert: keep the ⧉ icon, add ⚠️ + one-time notification on
+        # the upward crossing.
         threshold = prefs.get("threshold", 0)
         over = threshold > 0 and total > threshold
-        self.title = f"⚠️ {total}" if over else f"⧉ {total}"
+        self.title = f"⧉ ⚠️ {total}" if over else f"⧉ {total}"
         if over and not self._was_over:
             self._notify_threshold(total, threshold)
         self._was_over = over

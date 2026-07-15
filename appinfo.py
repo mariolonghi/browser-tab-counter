@@ -11,7 +11,7 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-VERSION = "0.4.0"  # threshold alert + tabs-over-time history
+VERSION = "0.4.1"  # keep ⧉ alongside ⚠️; README/docs tidy-up
 APP_NAME = "Browser Tab Counter"
 BUNDLE_ID = "com.mariolonghi.browsertabcounter"
 WEBSITE = "https://mariolonghi.com"
