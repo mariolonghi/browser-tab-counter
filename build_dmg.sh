@@ -125,9 +125,24 @@ rm -f "$DMG_PATH"
 hdiutil create -volname "$APP_NAME" -srcfolder "$STAGE" -ov -format UDZO "$DMG_PATH" >/dev/null
 rm -rf "$STAGE"
 
+# ----------------------------------------------------------------------------
+# Notarize + staple the DMG itself, so the downloaded .dmg also opens cleanly
+# (the app-staple above covers the app once installed; this covers the download).
+# ----------------------------------------------------------------------------
 if [[ "$HAVE_NOTARY" == "1" ]]; then
-    echo "==> Stapling the DMG too"
-    xcrun stapler staple "$DMG_PATH" && echo "    dmg staple OK" || echo "    (dmg staple skipped)"
+    echo "==> Notarizing the DMG (this can take a few minutes)…"
+    SUBMIT_OUT2="$(xcrun notarytool submit "$DMG_PATH" "${NOTARY_ARGS[@]}" --wait 2>&1)" || true
+    echo "$SUBMIT_OUT2"
+    SUBMISSION_ID2="$(printf '%s\n' "$SUBMIT_OUT2" | awk '/id:/{print $2; exit}')"
+    if printf '%s\n' "$SUBMIT_OUT2" | grep -q "status: Accepted"; then
+        echo "==> Stapling the DMG"
+        xcrun stapler staple "$DMG_PATH"
+        xcrun stapler validate "$DMG_PATH" && echo "    dmg staple OK"
+    else
+        echo "==> DMG NOTARIZATION FAILED — fetching the detailed issue log:"
+        [[ -n "$SUBMISSION_ID2" ]] && xcrun notarytool log "$SUBMISSION_ID2" "${NOTARY_ARGS[@]}" || true
+        exit 1
+    fi
 elif [[ "$NOTARIZABLE" == "1" ]]; then
     echo "==> NOTE: signed with Developer ID but NOT notarized (no notary creds)."
 else
