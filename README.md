@@ -8,23 +8,27 @@ It shows a single number near the clock (e.g. `⧉ 147`). Click it for a
 per-browser breakdown. No admin rights, no browser extension, no account.
 
 ```
-menu bar:  … ⧉ 8  🔋  🔎  Wed 16:32
+menu bar:  … ⧉ 8  🔋  🔎  Wed 16:32     (⚠️ 8 when over your alert threshold)
               └─ click ─┐
                         ▼
-              ┌────────────────────────┐
-              │ 8 tab(s) total         │
-              ├────────────────────────┤
-              │ Safari:              2 │
-              │ Microsoft Edge:      4 │
-              │ Firefox:             2 │
-              ├────────────────────────┤
-              │ Refresh now            │
-              │ Permissions          ▸ │
-              │ ✓ Launch at Login      │
-              ├────────────────────────┤
-              │ About Browser Tab Cou… │
-              │ Quit                   │
-              └────────────────────────┘
+              ┌──────────────────────────────────┐
+              │ 8 tab(s) total                   │
+              ├──────────────────────────────────┤
+              │ Safari:                        2 │
+              │ Microsoft Edge:                4 │
+              │ Firefox:                       2 │
+              ├──────────────────────────────────┤
+              │ Today ▁▂▃▅▇▆▄  min 5·avg 34·max 61│
+              ├──────────────────────────────────┤
+              │ Refresh now                      │
+              │ Alert threshold: off             │
+              │ Reveal tab-history file          │
+              │ Permissions                    ▸ │
+              │ ✓ Launch at Login                │
+              ├──────────────────────────────────┤
+              │ About Browser Tab Counter        │
+              │ Quit                             │
+              └──────────────────────────────────┘
 ```
 
 ---
@@ -35,13 +39,10 @@ menu bar:  … ⧉ 8  🔋  🔎  Wed 16:32
    [**Releases**](https://github.com/mariolonghi/browser-tab-counter/releases/latest) page.
 2. **Open the `.dmg`** and **drag** *Browser Tab Counter* onto the **Applications**
    folder shown in the window.
-3. **First launch — important:** the app isn't signed with a paid Apple
-   Developer certificate, so macOS Gatekeeper blocks a normal double-click.
-   Do this **once**:
-   - In **Applications**, **right-click** (or Control-click) *Browser Tab Counter*
-     → **Open** → in the dialog, click **Open** again.
-   - *(If macOS says the app "is damaged / can't be opened", run once in Terminal:*
-     `xattr -dr com.apple.quarantine "/Applications/Browser Tab Counter.app"`*, then reopen.)*
+3. **Double-click** *Browser Tab Counter* in **Applications** to launch it. The
+   app is Apple-notarized (v0.3.1+), so it just opens — no Gatekeeper warning.
+   *(Very old builds ≤ v0.3.0 were unsigned; if you're on one of those, either
+   grab the latest release or right-click → Open once.)*
 4. A **`⧉` number appears in your menu bar.** That's it — there's no window.
 
 ### 🔐 Grant the permission pop-ups (no admin needed)
@@ -75,11 +76,30 @@ button straight to the release. This runs only when you open About (not in the
 background), is a plain read-only request to GitHub — no personal data sent — and
 fails quietly if you're offline.
 
+### ⚠️ Alert threshold (optional)
+
+Menu → **Alert threshold** lets you pick a number. When your total goes **above**
+it, the menu-bar indicator switches from `⧉` to **`⚠️`** and you get a single
+notification (it re-arms once the count drops back below). Enter **0** to turn it
+off. Your choice is saved locally.
+
+### 📈 Tabs over time
+
+The dropdown shows a tiny **sparkline** of today's total with **min · avg · max**.
+The app samples the total every few minutes into a small, capped local file
+(≈ a week of history, a few KB — **counts only, never tab content**). Menu →
+**Reveal tab-history file** opens it in Finder if you want the raw numbers.
+
 ### ⭐ Launch at login (optional)
 
 Click the `⧉` menu → **Launch at Login** to toggle it on (a checkmark appears).
 The app will start automatically each time you log in. Toggle again to turn off.
 No admin required — it uses a per-user LaunchAgent.
+
+### 🔒 Your data
+
+Everything stays on your Mac in `~/Library/Application Support/BrowserTabCounter/`
+(`prefs.json`, `history.csv`). No cloud, no account, no telemetry.
 
 ### Quit
 
@@ -210,6 +230,8 @@ which then opens with a **plain double-click**.
 | `appinfo.py` | Shared metadata (version, bundle id, install date) — no heavy deps |
 | `permissions.py` | Re-trigger Automation prompts (`tccutil`) + open settings pane |
 | `updates.py` | Check GitHub Releases for a newer version (certifi-backed HTTPS) |
+| `prefs.py` | Local settings store (`prefs.json`) — threshold, etc. |
+| `history.py` | Tabs-over-time sampling → capped `history.csv` + sparkline |
 | `login_item.py` | Launch-at-login toggle (per-user LaunchAgent) |
 | `setup.py` | py2app bundle config (`LSUIElement`, Automation usage string) |
 | `entitlements.plist` | Hardened-runtime entitlements (for Developer ID / notarization) |
