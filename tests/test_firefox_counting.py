@@ -7,7 +7,13 @@ No third-party deps required — plain asserts, runnable directly.
 
 from __future__ import annotations
 
-import tabcount as t
+import os
+import sys
+
+# App modules live in ../src.
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
+
+import tabcount as t  # noqa: E402
 
 
 def test_sum_across_multiple_windows():

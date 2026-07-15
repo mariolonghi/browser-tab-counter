@@ -5,7 +5,7 @@ browsers. Click it for a per-browser breakdown, an About/troubleshoot panel, a
 "re-request permissions" action, and a launch-at-login toggle.
 
 Run:
-    ./.venv/bin/python app.py
+    ./.venv/bin/python src/app.py
 
 Requires the macOS *Automation* permission (user-granted, no admin) the first
 time it queries each browser.

@@ -132,15 +132,21 @@ cd browser-tab-counter
 Run the menu-bar app, or just the counter in the terminal (handy for testing):
 
 ```bash
-./.venv/bin/python app.py
-./.venv/bin/python tabcount.py
+./.venv/bin/python src/app.py
+./.venv/bin/python src/tabcount.py
+```
+
+Run the tests:
+
+```bash
+./.venv/bin/python tests/test_firefox_counting.py
 ```
 
 Build the distributable `.dmg`:
 
 ```bash
 ./.venv/bin/pip install py2app
-./build_dmg.sh          # → dist/BrowserTabCounter-<version>.dmg
+./packaging/build_dmg.sh          # → dist/BrowserTabCounter-<version>.dmg
 ```
 
 `build_dmg.sh` signs with a Developer ID certificate if one is present (and can
@@ -149,20 +155,26 @@ notarize + staple the result), otherwise it falls back to an ad-hoc signature.
 
 ### Project layout
 
-| File | Purpose |
+```
+src/          the app
+packaging/    everything to build & sign the .dmg
+tests/        regression tests
+```
+
+| Path | Purpose |
 |------|---------|
-| `tabcount.py` | UI-free tab-counting logic (AppleScript + Firefox mozLz4 parse); also a CLI |
-| `app.py` | rumps menu-bar app: polls, renders the number, About + Permissions menus |
-| `appinfo.py` | Shared metadata (version, bundle id, install date) — no heavy deps |
-| `permissions.py` | Re-trigger Automation prompts (`tccutil`) + open settings pane |
-| `updates.py` | Check GitHub Releases for a newer version (certifi-backed HTTPS) |
-| `prefs.py` | Local settings store (`prefs.json`) — threshold, etc. |
-| `history.py` | Tabs-over-time sampling → capped `history.csv` + sparkline |
-| `login_item.py` | Launch-at-login toggle (per-user LaunchAgent) |
-| `setup.py` | py2app bundle config (`LSUIElement`, Automation usage string) |
-| `entitlements.plist` | Hardened-runtime entitlements (for Developer ID / notarization) |
-| `build_dmg.sh` | Build → sign (Developer ID *or* ad-hoc) → `.dmg` → optional notarize |
-| `test_firefox_counting.py` | Regression tests for multi-window / multi-profile counting |
+| `src/app.py` | rumps menu-bar app: polls, renders the number, About + Permissions menus |
+| `src/tabcount.py` | UI-free tab-counting logic (AppleScript + Firefox mozLz4 parse); also a CLI |
+| `src/appinfo.py` | Shared metadata (version, bundle id, install date) — no heavy deps |
+| `src/permissions.py` | Re-trigger Automation prompts (`tccutil`) + open settings pane |
+| `src/updates.py` | Check GitHub Releases for a newer version (certifi-backed HTTPS) |
+| `src/prefs.py` | Local settings store (`prefs.json`) — threshold, etc. |
+| `src/history.py` | Tabs-over-time sampling → capped `history.csv` + sparkline |
+| `src/login_item.py` | Launch-at-login toggle (per-user LaunchAgent) |
+| `packaging/setup.py` | py2app bundle config (`LSUIElement`, Automation usage string) |
+| `packaging/entitlements.plist` | Hardened-runtime entitlements (for Developer ID / notarization) |
+| `packaging/build_dmg.sh` | Build → sign (Developer ID *or* ad-hoc) → `.dmg` → optional notarize |
+| `tests/test_firefox_counting.py` | Regression tests for multi-window / multi-profile counting |
 | `requirements.txt` | Runtime deps (`rumps`, `certifi`) |
 
 ---

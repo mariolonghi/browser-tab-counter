@@ -6,8 +6,8 @@ app. We deliberately do **not** ``launchctl load`` it the moment the user
 enables it, because the app is already running — loading a RunAtLoad agent then
 would spawn a duplicate. Writing the file is enough for it to start next login.
 
-Works both when running from source (``python app.py``) and when frozen into a
-py2app ``.app`` bundle.
+Works both when running from source (``python src/app.py``) and when frozen into
+a py2app ``.app`` bundle.
 """
 
 from __future__ import annotations

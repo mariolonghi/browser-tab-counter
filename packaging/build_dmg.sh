@@ -1,7 +1,7 @@
 #!/bin/bash
 # Build a distributable .dmg for Browser Tab Counter.
 #
-#   ./build_dmg.sh
+#   ./packaging/build_dmg.sh          (run from anywhere; it cd's to the repo root)
 #
 # Signing behaviour is automatic:
 #   * If a "Developer ID Application" certificate is in your keychain (paid
@@ -18,19 +18,22 @@
 #
 # Override the signing identity explicitly with:  SIGN_IDENTITY="Developer ID Application: ..."
 set -euo pipefail
-cd "$(dirname "$0")"
+# Run from the repo root (this script lives in packaging/). All paths below are
+# relative to the repo root so dist/ lands there, as the CI workflow expects.
+cd "$(dirname "$0")/.."
 
 APP_NAME="Browser Tab Counter"
-VERSION="$(./.venv/bin/python -c 'import appinfo; print(appinfo.VERSION)')"
+VERSION="$(PYTHONPATH=src ./.venv/bin/python -c 'import appinfo; print(appinfo.VERSION)')"
 DMG_PATH="dist/BrowserTabCounter-${VERSION}.dmg"
 PY="./.venv/bin/python"
 APP="dist/${APP_NAME}.app"
+ENTITLEMENTS="packaging/entitlements.plist"
 
 echo "==> Cleaning previous build"
 rm -rf build dist
 
 echo "==> Building .app (py2app) — version ${VERSION}"
-"$PY" setup.py py2app >/dev/null
+"$PY" packaging/setup.py py2app >/dev/null
 
 # ----------------------------------------------------------------------------
 # Sign
@@ -61,7 +64,7 @@ if [[ -n "$IDENTITY" ]]; then
     done < <(find "$APP/Contents/Frameworks" -maxdepth 1 -name "*.framework" -type d -print0 2>/dev/null)
     #   3) finally the whole app bundle, WITH entitlements (no --deep)
     codesign --force --timestamp --options runtime \
-        --entitlements entitlements.plist --sign "$IDENTITY" "$APP"
+        --entitlements "$ENTITLEMENTS" --sign "$IDENTITY" "$APP"
     NOTARIZABLE=1
 else
     echo "==> No Developer ID cert found — ad-hoc signing (not notarizable)"

@@ -1,17 +1,26 @@
 """py2app build config for Browser Tab Counter.
 
-Build a standalone menu-bar .app:
+The app modules live in ../src; this file lives in packaging/. Build from the
+repo root (build_dmg.sh does this for you):
 
-    ./.venv/bin/python setup.py py2app
+    ./.venv/bin/python packaging/setup.py py2app   # -> dist/ at the repo root
 
-Or use ./build_dmg.sh to produce a distributable .dmg.
+Or just run ./packaging/build_dmg.sh to produce a distributable .dmg.
 """
+
+import os
+import sys
 
 from setuptools import setup
 
-import appinfo
+# Make the app modules in ../src importable (for `import appinfo` below and for
+# py2app's dependency analysis), regardless of the current working directory.
+_SRC = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src")
+sys.path.insert(0, _SRC)
 
-APP = ["app.py"]
+import appinfo  # noqa: E402 - resolved via the sys.path insert above
+
+APP = [os.path.join(_SRC, "app.py")]
 
 OPTIONS = {
     "argv_emulation": False,          # menu-bar app; Carbon argv emulation not needed
