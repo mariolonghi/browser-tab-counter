@@ -14,6 +14,8 @@ time it queries each browser.
 from __future__ import annotations
 
 import subprocess
+from datetime import datetime
+from pathlib import Path
 
 import rumps
 
@@ -22,6 +24,7 @@ import history
 import login_item
 import permissions
 import prefs
+import tabexport
 import updates
 from tabcount import BROWSERS, count_all, total_tabs
 
@@ -98,6 +101,8 @@ class TabCounterApp(rumps.App):
 
         self.menu.add(rumps.separator)
         self.menu.add(rumps.MenuItem("Refresh now", callback=self.refresh))
+        self.menu.add(rumps.MenuItem("Export open tabs to CSV…",
+                                     callback=self.export_tabs))
 
         threshold = prefs.get("threshold", 0)
         label = f"Alert threshold: {threshold}" if threshold else "Alert threshold: off"
@@ -202,6 +207,47 @@ class TabCounterApp(rumps.App):
             rumps.alert("Tab History",
                         "No history recorded yet — it starts filling in within a "
                         "few minutes of running.")
+
+    def export_tabs(self, _sender) -> None:
+        """Gather every open tab right now and save it as a CSV the user picks."""
+        # Re-poll first so anything opened in the last few seconds is included
+        # (Chromium/Safari are read live anyway; this also refreshes Firefox's
+        # session read and keeps the menu-bar count in step with the export).
+        self.refresh(None)
+        try:
+            rows = tabexport.gather_all()
+        except Exception as exc:  # noqa: BLE001 - never crash the menu bar
+            rumps.alert("Export Open Tabs", f"Couldn't read the open tabs:\n{exc}")
+            return
+        if not rows:
+            rumps.alert("Export Open Tabs",
+                        "No open tabs found in the running browsers.")
+            return
+
+        default_name = f"{appinfo.APP_NAME} - open tabs - {datetime.now():%Y-%m-%d-%H%M%S}.csv"
+        path = self._ask_save_path(default_name)
+        if not path:
+            return
+        try:
+            tabexport.write_csv(rows, path)
+        except OSError as exc:
+            rumps.alert("Export Open Tabs", f"Couldn't write the file:\n{exc}")
+            return
+        subprocess.run(["open", "-R", path], capture_output=True)  # reveal in Finder
+
+    def _ask_save_path(self, default_name: str) -> str | None:
+        """A native Save panel; falls back to ~/Downloads if it can't be shown."""
+        try:
+            import AppKit
+            AppKit.NSApplication.sharedApplication().activateIgnoringOtherApps_(True)
+            panel = AppKit.NSSavePanel.savePanel()
+            panel.setNameFieldStringValue_(default_name)
+            panel.setTitle_("Export Open Tabs")
+            if panel.runModal() == 1:            # NSModalResponseOK
+                return panel.URL().path()
+            return None                          # user cancelled
+        except Exception:  # noqa: BLE001 - AppKit unavailable / panel failed
+            return str(Path.home() / "Downloads" / default_name)
 
     def _notify_threshold(self, total: int, threshold: int) -> None:
         try:

@@ -90,6 +90,17 @@ The app samples the total every few minutes into a small, capped local file
 (≈ a week of history, a few KB — **counts only, never tab content**). Menu →
 **Reveal tab-history file** opens it in Finder if you want the raw numbers.
 
+### 📄 Export open tabs to CSV 🆕
+
+Menu → **Export open tabs to CSV…** takes a snapshot of every tab open *right
+now* and saves it wherever you choose. Each row captures as much as the browser
+exposes: `browser, window, tab, active, pinned, loading, window_mode,
+last_accessed, title, url`. This is the one action that reads tab **titles and
+URLs** — so it's **on demand only** (nothing is gathered until you click it),
+**read-only**, and **local** (the file goes only where you save it; nothing is
+kept or sent). Private/incognito windows aren't included (browsers don't expose
+them).
+
 ### ⭐ Launch at login (optional)
 
 Click the `⧉` menu → **Launch at Login** to toggle it on (a checkmark appears).
@@ -170,11 +181,13 @@ tests/        regression tests
 | `src/updates.py` | Check GitHub Releases for a newer version (certifi-backed HTTPS) |
 | `src/prefs.py` | Local settings store (`prefs.json`) — threshold, etc. |
 | `src/history.py` | Tabs-over-time sampling → capped `history.csv` + sparkline |
+| `src/tabexport.py` | On-demand snapshot of all open tabs → CSV (title/URL + extras) |
 | `src/login_item.py` | Launch-at-login toggle (per-user LaunchAgent) |
 | `packaging/setup.py` | py2app bundle config (`LSUIElement`, Automation usage string) |
 | `packaging/entitlements.plist` | Hardened-runtime entitlements (for Developer ID / notarization) |
 | `packaging/build_dmg.sh` | Build → sign (Developer ID *or* ad-hoc) → `.dmg` → optional notarize |
 | `tests/test_firefox_counting.py` | Regression tests for multi-window / multi-profile counting |
+| `tests/test_tabexport.py` | Tests for the CSV export (columns, quoting, Firefox extras) |
 | `requirements.txt` | Runtime deps (`rumps`, `certifi`) |
 
 ---

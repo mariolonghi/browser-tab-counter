@@ -94,12 +94,18 @@ _COUNT_SCRIPT = (
 )
 
 
-def _osascript(script: str) -> tuple[bool, str]:
-    """Run an AppleScript, returning (ok, stdout-or-stderr)."""
+def _osascript(script: str, timeout: float = 5) -> tuple[bool, str]:
+    """Run an AppleScript, returning (ok, stdout-or-stderr).
+
+    Decode as UTF-8 explicitly: a py2app app launched from Finder runs under a
+    C/POSIX locale, so subprocess text mode would otherwise default to ASCII and
+    choke on non-ASCII tab titles (em dashes, ellipses, emoji, accents, …).
+    """
     try:
         proc = subprocess.run(
             ["osascript", "-e", script],
-            capture_output=True, text=True, timeout=5,
+            capture_output=True, encoding="utf-8", errors="replace",
+            timeout=timeout,
         )
     except subprocess.TimeoutExpired:
         return False, "timeout"
