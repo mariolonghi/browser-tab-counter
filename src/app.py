@@ -75,6 +75,7 @@ class TabCounterApp(rumps.App):
         super().__init__("⧉ …", quit_button=None)
         self._last_counts = []
         self._was_over = False        # threshold-crossing state (notify once)
+        self._first_run_setup()       # default new installs to Launch-at-Login
         self._build_menu([], 0, first=True)
         self.timer = rumps.Timer(self.refresh, POLL_SECONDS)
         self.timer.start()
@@ -129,6 +130,20 @@ class TabCounterApp(rumps.App):
         self.menu.add(rumps.MenuItem("Quit", callback=rumps.quit_application))
 
     # ---- actions -----------------------------------------------------------
+
+    def _first_run_setup(self) -> None:
+        """On the very first launch of an installed build, enable Launch-at-Login
+        by default. Runs once — if the user later turns it off, it stays off.
+        Skipped when running from source so dev runs don't create a login item.
+        """
+        if prefs.get("first_run_done", False):
+            return
+        prefs.update("first_run_done", True)
+        if appinfo.is_frozen() and not login_item.is_enabled():
+            try:
+                login_item.enable()
+            except Exception:  # noqa: BLE001 - best effort, never block startup
+                pass
 
     def toggle_login(self, sender) -> None:
         try:

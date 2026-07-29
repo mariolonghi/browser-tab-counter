@@ -11,7 +11,7 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-VERSION = "0.6.0"  # in-app self-update from the About panel
+VERSION = "0.6.1"  # menu width cap; README mockup fixes
 APP_NAME = "Browser Tab Counter"
 BUNDLE_ID = "com.mariolonghi.browsertabcounter"
 WEBSITE = "https://mariolonghi.com"

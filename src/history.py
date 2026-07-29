@@ -92,14 +92,26 @@ def today_samples() -> list[int]:
     return [v for ts, v in _read_rows() if ts.date() == today]
 
 
-def menu_summary() -> str:
-    """One-line summary for the dropdown."""
+# Cap the whole summary line so the dropdown stays narrow no matter how many
+# samples pile up during the day.
+_MAX_WIDTH = 48
+
+
+def menu_summary(max_width: int = _MAX_WIDTH) -> str:
+    """One-line, width-capped summary for the dropdown.
+
+    The sparkline is sized to fit whatever budget is left after the label and
+    stats, so the menu never grows wider than ~max_width characters.
+    """
     vals = today_samples()
     if not vals:
         return "Tab history: collecting…"
-    spark = sparkline(vals[-40:])
-    avg = round(sum(vals) / len(vals))
-    return f"Today {spark}  min {min(vals)} · avg {avg} · max {max(vals)}"
+    lo, hi, avg = min(vals), max(vals), round(sum(vals) / len(vals))
+    prefix = "Today "
+    suffix = f"  {lo}-{hi} · avg {avg}"
+    budget = max(8, max_width - len(prefix) - len(suffix))
+    spark = sparkline(vals[-budget:])
+    return f"{prefix}{spark}{suffix}"
 
 
 if __name__ == "__main__":

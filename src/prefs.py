@@ -15,6 +15,7 @@ PREFS_PATH = APP_SUPPORT / "prefs.json"
 
 DEFAULTS: dict = {
     "threshold": 0,          # alert when total > threshold; 0 = off
+    "first_run_done": False,  # first launch enables Launch-at-Login by default
 }
 
 

@@ -11,24 +11,25 @@ per-browser breakdown. No admin rights, no browser extension, no account.
 menu bar:  … ⧉ 8  🔋  🔎  Wed 16:32     (⧉ ⚠️ 8 when over your alert threshold)
               └─ click ─┐
                         ▼
-              ┌──────────────────────────────────┐
-              │ 8 tab(s) total                   │
-              ├──────────────────────────────────┤
-              │ Safari:                        2 │
-              │ Microsoft Edge:                4 │
-              │ Firefox:                       2 │
-              ├──────────────────────────────────┤
-              │ Today ▁▂▃▅▇▆▄  min 5·avg 34·max 61│
-              ├──────────────────────────────────┤
-              │ Refresh now                      │
-              │ Alert threshold: off             │
-              │ Reveal tab-history file          │
-              │ Permissions                    ▸ │
-              │ ✓ Launch at Login                │
-              ├──────────────────────────────────┤
-              │ About Browser Tab Counter        │
-              │ Quit                             │
-              └──────────────────────────────────┘
+              ┌────────────────────────────────────┐
+              │ 8 tab(s) total                     │
+              ├────────────────────────────────────┤
+              │ Safari:                          2 │
+              │ Microsoft Edge:                  4 │
+              │ Firefox:                         2 │
+              ├────────────────────────────────────┤
+              │ Today ▁▂▃▅▇▆▄  5-61 · avg 34       │
+              ├────────────────────────────────────┤
+              │ Refresh now                        │
+              │ Export open tabs to CSV…           │
+              │ Alert threshold: off               │
+              │ Reveal tab-history file            │
+              │ Permissions                      ▸ │
+              │ ✓ Launch at Login                  │
+              ├────────────────────────────────────┤
+              │ About Browser Tab Counter          │
+              │ Quit                               │
+              └────────────────────────────────────┘
 ```
 
 ---
@@ -105,11 +106,12 @@ URLs** — so it's **on demand only** (nothing is gathered until you click it),
 kept or sent). Private/incognito windows aren't included (browsers don't expose
 them).
 
-### ⭐ Launch at login (optional)
+### ⭐ Launch at login
 
-Click the `⧉` menu → **Launch at Login** to toggle it on (a checkmark appears).
-The app will start automatically each time you log in. Toggle again to turn off.
-No admin required — it uses a per-user LaunchAgent.
+**On by default** — a new install turns itself on to start each time you log in
+(it's a menu-bar utility, after all). Don't want that? Menu → **Launch at Login**
+to toggle it off (the checkmark disappears), and it stays off. No admin required —
+it uses a per-user LaunchAgent.
 
 ### Quit
 
