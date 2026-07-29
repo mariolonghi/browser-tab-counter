@@ -79,7 +79,9 @@ def check(timeout: float = 3.0, use_cache: bool = True) -> UpdateStatus:
     })
     try:
         with urllib.request.urlopen(req, timeout=timeout, context=_SSL_CONTEXT) as resp:
-            data = json.load(resp)
+            # Sanity cap (2 MB): a release JSON is a few KB; never slurp
+            # an unexpectedly huge response into memory.
+            data = json.loads(resp.read(2 * 1024 * 1024))
         latest = (data.get("tag_name") or "").strip().lstrip("vV")
         dmg = next((a.get("browser_download_url") for a in data.get("assets", [])
                     if str(a.get("name", "")).lower().endswith(".dmg")), None)

@@ -18,12 +18,11 @@ menu bar:  … ⧉ 8  🔋  🔎  Wed 16:32     (⧉ ⚠️ 8 when over your ale
               │ Microsoft Edge:                  4 │
               │ Firefox:                         2 │
               ├────────────────────────────────────┤
-              │ Today ▁▂▃▅▇▆▄  5-61 · avg 34       │
+              │ Today ▁▂▃▅▇▆▄  5-61 · avg 34       │ ← click to save
               ├────────────────────────────────────┤
               │ Refresh now                        │
               │ Export open tabs to CSV…           │
               │ Alert threshold: off               │
-              │ Reveal tab-history file            │
               │ Permissions                      ▸ │
               │ ✓ Launch at Login                  │
               ├────────────────────────────────────┤
@@ -92,8 +91,9 @@ turn it off. Your choice is saved locally.
 
 The dropdown shows a tiny **sparkline** of today's total with **min · avg · max**.
 The app samples the total every few minutes into a small, capped local file
-(≈ a week of history, a few KB — **counts only, never tab content**). Menu →
-**Reveal tab-history file** opens it in Finder if you want the raw numbers.
+(≈ a week of history, a few KB — **counts only, never tab content**).
+**Click the sparkline** to save a copy of that history as a CSV wherever you
+like 🆕.
 
 ### 📄 Export open tabs to CSV 🆕
 

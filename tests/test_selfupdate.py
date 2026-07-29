@@ -35,8 +35,32 @@ def test_team_id_is_pinned():
     assert selfupdate.TEAM_ID == "ZWXAL8XA46"
 
 
+def test_url_allowlist():
+    ok = [
+        "https://github.com/mariolonghi/browser-tab-counter/releases/download/v1/x.dmg",
+        "https://objects.githubusercontent.com/anything",
+        "https://release-assets.githubusercontent.com/x.dmg",
+    ]
+    bad = [
+        "http://github.com/x.dmg",                    # not https
+        "https://evil.example.com/x.dmg",             # wrong host
+        "https://github.com.evil.example/x.dmg",      # host suffix trick
+        "file:///tmp/x.dmg",                          # local file scheme
+        "https://foogithubusercontent.com/x.dmg",     # missing dot boundary
+    ]
+    for url in ok:
+        selfupdate._check_url(url)
+    for url in bad:
+        try:
+            selfupdate._check_url(url)
+            raise AssertionError(f"should have rejected {url}")
+        except selfupdate.UpdateError:
+            pass
+
+
 if __name__ == "__main__":
     test_shell_quoting_is_injection_safe()
     test_verify_rejects_missing_app()
     test_team_id_is_pinned()
+    test_url_allowlist()
     print("all self-update tests passed")

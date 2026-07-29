@@ -41,7 +41,11 @@ def update(key: str, value) -> dict:
     ensure_dir()
     data = load()
     data[key] = value
-    PREFS_PATH.write_text(json.dumps(data, indent=2), encoding="utf-8")
+    # Atomic write (temp file + rename): a crash mid-write can never leave a
+    # truncated/corrupt prefs.json behind.
+    tmp = PREFS_PATH.with_suffix(".json.tmp")
+    tmp.write_text(json.dumps(data, indent=2), encoding="utf-8")
+    tmp.replace(PREFS_PATH)
     return data
 
 

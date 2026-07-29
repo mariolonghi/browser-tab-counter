@@ -13,6 +13,7 @@ time it queries each browser.
 
 from __future__ import annotations
 
+import shutil
 import subprocess
 from datetime import datetime
 from pathlib import Path
@@ -97,9 +98,10 @@ class TabCounterApp(rumps.App):
                 value = c.tabs if c.tabs is not None else "— (permission?)"
                 self.menu.add(rumps.MenuItem(f"{c.name}:  {value}"))
 
-        # Tabs-over-time summary (non-clickable info line).
+        # Tabs-over-time summary — click it to download the history CSV.
         self.menu.add(rumps.separator)
-        self.menu.add(rumps.MenuItem(history.menu_summary()))
+        self.menu.add(rumps.MenuItem(history.menu_summary(),
+                                     callback=self.download_history))
 
         self.menu.add(rumps.separator)
         self.menu.add(rumps.MenuItem("Refresh now", callback=self.refresh))
@@ -109,8 +111,6 @@ class TabCounterApp(rumps.App):
         threshold = prefs.get("threshold", 0)
         label = f"Alert threshold: {threshold}" if threshold else "Alert threshold: off"
         self.menu.add(rumps.MenuItem(label, callback=self.set_threshold))
-        self.menu.add(rumps.MenuItem("Reveal tab-history file",
-                                     callback=self.reveal_history))
 
         # Permissions submenu.
         perms = rumps.MenuItem("Permissions")
@@ -215,14 +215,23 @@ class TabCounterApp(rumps.App):
         self._was_over = False        # re-arm so it can fire again
         self.refresh(None)
 
-    def reveal_history(self, _sender) -> None:
-        if history.HISTORY_PATH.exists():
-            subprocess.run(["open", "-R", str(history.HISTORY_PATH)],
-                           capture_output=True)
-        else:
+    def download_history(self, _sender) -> None:
+        """Save a copy of the tab-count history CSV wherever the user chooses."""
+        if not history.HISTORY_PATH.exists():
             rumps.alert("Tab History",
                         "No history recorded yet — it starts filling in within a "
                         "few minutes of running.")
+            return
+        default_name = f"{appinfo.APP_NAME} - tab history - {datetime.now():%Y-%m-%d}.csv"
+        path = self._ask_save_path(default_name, title="Save Tab History")
+        if not path:
+            return
+        try:
+            shutil.copyfile(history.HISTORY_PATH, path)
+        except OSError as exc:
+            rumps.alert("Tab History", f"Couldn't save the file:\n{exc}")
+            return
+        subprocess.run(["open", "-R", path], capture_output=True)  # reveal in Finder
 
     def export_tabs(self, _sender) -> None:
         """Gather every open tab right now and save it as a CSV the user picks."""
@@ -241,7 +250,7 @@ class TabCounterApp(rumps.App):
             return
 
         default_name = f"{appinfo.APP_NAME} - open tabs - {datetime.now():%Y-%m-%d-%H%M%S}.csv"
-        path = self._ask_save_path(default_name)
+        path = self._ask_save_path(default_name, title="Export Open Tabs")
         if not path:
             return
         try:
@@ -251,14 +260,15 @@ class TabCounterApp(rumps.App):
             return
         subprocess.run(["open", "-R", path], capture_output=True)  # reveal in Finder
 
-    def _ask_save_path(self, default_name: str) -> str | None:
+    def _ask_save_path(self, default_name: str,
+                       title: str = "Save") -> str | None:
         """A native Save panel; falls back to ~/Downloads if it can't be shown."""
         try:
             import AppKit
             AppKit.NSApplication.sharedApplication().activateIgnoringOtherApps_(True)
             panel = AppKit.NSSavePanel.savePanel()
             panel.setNameFieldStringValue_(default_name)
-            panel.setTitle_("Export Open Tabs")
+            panel.setTitle_(title)
             if panel.runModal() == 1:            # NSModalResponseOK
                 return panel.URL().path()
             return None                          # user cancelled

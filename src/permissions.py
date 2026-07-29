@@ -37,6 +37,10 @@ def open_automation_settings() -> None:
 
 
 def open_website(url: str) -> None:
+    # Only ever hand https URLs to `open` — guards against a malformed/mangled
+    # URL reaching the shell-out (e.g. a file:// or custom-scheme string).
+    if not str(url).startswith("https://"):
+        return
     subprocess.run(["open", url], capture_output=True)
 
 

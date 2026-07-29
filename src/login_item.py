@@ -35,7 +35,11 @@ def _program_arguments() -> list[str]:
 
 
 def _plist_xml(program_args: list[str]) -> str:
-    args_xml = "\n".join(f"        <string>{a}</string>" for a in program_args)
+    from xml.sax.saxutils import escape
+    # XML-escape every value: a path containing & or < would otherwise produce a
+    # malformed plist that launchd silently refuses to load.
+    args_xml = "\n".join(f"        <string>{escape(a)}</string>"
+                         for a in program_args)
     return (
         '<?xml version="1.0" encoding="UTF-8"?>\n'
         '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" '

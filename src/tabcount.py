@@ -134,8 +134,15 @@ _MOZLZ4_MAGIC = b"mozLz40\0"
 def _lz4_decompress_block(src: bytes, expected_size: int) -> bytes:
     """Decode a raw LZ4 block (the format Mozilla wraps in mozLz4).
 
-    Pure Python so nothing needs compiling into the app bundle.
+    Pure Python so nothing needs compiling into the app bundle. Defensive
+    against corrupt/malformed input: invalid match offsets raise ValueError
+    (instead of silently producing garbage via negative indexing), and output
+    is capped so a crafted file can't balloon memory. Callers treat any
+    exception as "unreadable file" and skip it.
     """
+    # Output cap: the header's expected size (plus slack), floored at 64 MB for
+    # tolerance of writers that pad. Real session stores are a few MB.
+    hard_cap = max(64 * 1024 * 1024, expected_size * 2)
     out = bytearray()
     i, n = 0, len(src)
     while i < n:
@@ -166,6 +173,10 @@ def _lz4_decompress_block(src: bytes, expected_size: int) -> bytes:
                 if b != 255:
                     break
         start = len(out) - offset
+        if offset == 0 or start < 0:
+            raise ValueError("corrupt LZ4 block (bad match offset)")
+        if len(out) + match_len > hard_cap:
+            raise ValueError("LZ4 output exceeds size cap")
         for j in range(match_len):
             out.append(out[start + j])
     if expected_size and len(out) != expected_size:

@@ -18,12 +18,20 @@ import os
 import shutil
 import subprocess
 import tempfile
+import urllib.parse
 import urllib.request
 from pathlib import Path
 
 import appinfo
 
 TEAM_ID = "ZWXAL8XA46"   # pinned: only ever install builds signed by us
+
+# Where release assets may legitimately come from. The cryptographic gate is
+# verify_app(); this allow-list is defense-in-depth so we never even fetch from
+# an unexpected place.
+_ALLOWED_HOSTS = ("github.com", "objects.githubusercontent.com",
+                  "release-assets.githubusercontent.com")
+_MAX_DOWNLOAD_BYTES = 200 * 1024 * 1024   # sanity cap; our DMGs are ~30 MB
 
 
 class UpdateError(Exception):
@@ -50,14 +58,30 @@ def can_self_update() -> tuple[bool, str]:
 # Download + mount + verify
 # --------------------------------------------------------------------------
 
+def _check_url(url: str) -> None:
+    """HTTPS + GitHub hosts only (defense-in-depth; verify_app is the real gate)."""
+    parsed = urllib.parse.urlparse(url)
+    host = (parsed.hostname or "").lower()
+    if parsed.scheme != "https" or not (
+        host in _ALLOWED_HOSTS or host.endswith(".githubusercontent.com")
+    ):
+        raise UpdateError("unexpected update URL — refusing to download")
+
+
 def _download(url: str, dest: Path, timeout: float = 180) -> None:
     from updates import _SSL_CONTEXT  # reuse the certifi-backed context
+    _check_url(url)
     req = urllib.request.Request(url, headers={
         "User-Agent": f"BrowserTabCounter/{appinfo.VERSION}",
     })
+    written = 0
     with urllib.request.urlopen(req, timeout=timeout, context=_SSL_CONTEXT) as r:
         with open(dest, "wb") as f:
-            shutil.copyfileobj(r, f)
+            while chunk := r.read(1024 * 1024):
+                written += len(chunk)
+                if written > _MAX_DOWNLOAD_BYTES:
+                    raise UpdateError("update download is unexpectedly large")
+                f.write(chunk)
 
 
 def _mount(dmg: Path) -> Path:
@@ -87,7 +111,19 @@ def _find_app(mount: Path) -> Path:
 
 
 def verify_app(app: Path) -> None:
-    """Reject anything not notarized AND signed by our Team ID."""
+    """Reject anything that isn't a valid, notarized app signed by our Team ID.
+
+    Three independent checks:
+      1. codesign --verify --deep --strict — the signature is intact (nothing
+         inside the bundle was modified after signing).
+      2. spctl -a -t exec — Gatekeeper accepts it (Developer ID + notarized).
+      3. TeamIdentifier — the signer is US, not just any notarized developer.
+    """
+    integ = subprocess.run(
+        ["codesign", "--verify", "--deep", "--strict", str(app)],
+        capture_output=True, encoding="utf-8", errors="replace")
+    if integ.returncode != 0:
+        raise UpdateError("the download's code signature is invalid")
     gate = subprocess.run(["spctl", "-a", "-t", "exec", str(app)],
                           capture_output=True, encoding="utf-8", errors="replace")
     if gate.returncode != 0:
@@ -176,14 +212,13 @@ def perform_update(dmg_url: str, target: Path | None = None,
         staged = workdir / new_app.name
         subprocess.run(["ditto", str(new_app), str(staged)], check=True)
     except UpdateError:
-        _unmount(mount)
         shutil.rmtree(workdir, ignore_errors=True)
         raise
     except Exception as exc:  # noqa: BLE001
-        _unmount(mount)
         shutil.rmtree(workdir, ignore_errors=True)
         raise UpdateError(f"couldn't prepare the update: {exc}") from exc
     finally:
+        # Single unmount for every path (success and failure alike).
         _unmount(mount)
         dmg.unlink(missing_ok=True)
 

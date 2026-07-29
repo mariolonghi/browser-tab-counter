@@ -94,7 +94,7 @@ def today_samples() -> list[int]:
 
 # Cap the whole summary line so the dropdown stays narrow no matter how many
 # samples pile up during the day.
-_MAX_WIDTH = 48
+_MAX_WIDTH = 45
 
 
 def menu_summary(max_width: int = _MAX_WIDTH) -> str:
