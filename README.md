@@ -70,11 +70,15 @@ The menu → **About Browser Tab Counter** shows version, install date, poll
 interval, and each running browser's current permission status — handy when
 something isn't counting. It also links to the developer site, mariolonghi.com.
 
-**Update check.** Opening About checks GitHub Releases and tells you whether
-you're on the latest version; if a newer one exists you get a **Download update**
-button straight to the release. This runs only when you open About (not in the
-background), is a plain read-only request to GitHub — no personal data sent — and
-fails quietly if you're offline.
+**Update check & one-click self-update 🆕.** Opening About checks GitHub Releases
+and tells you whether you're on the latest version. If a newer one exists, click
+**Update now** and the app updates *itself* — it downloads the new release,
+**verifies it's notarized and signed by the same developer** (a tampered or fake
+"update" can't install), swaps the app in place, and relaunches. No admin, no
+manual drag-to-Applications. (Running from source or a read-only location? It
+falls back to a **Download update** button that opens the release page instead.)
+The check runs only when you open About — a plain read-only request to GitHub, no
+personal data sent, and it fails quietly offline.
 
 ### ⚠️ Alert threshold (optional)
 
@@ -179,6 +183,7 @@ tests/        regression tests
 | `src/appinfo.py` | Shared metadata (version, bundle id, install date) — no heavy deps |
 | `src/permissions.py` | Re-trigger Automation prompts (`tccutil`) + open settings pane |
 | `src/updates.py` | Check GitHub Releases for a newer version (certifi-backed HTTPS) |
+| `src/selfupdate.py` | In-app self-update: download → verify (notarized + Team ID) → swap → relaunch |
 | `src/prefs.py` | Local settings store (`prefs.json`) — threshold, etc. |
 | `src/history.py` | Tabs-over-time sampling → capped `history.csv` + sparkline |
 | `src/tabexport.py` | On-demand snapshot of all open tabs → CSV (title/URL + extras) |
@@ -188,6 +193,7 @@ tests/        regression tests
 | `packaging/build_dmg.sh` | Build → sign (Developer ID *or* ad-hoc) → `.dmg` → optional notarize |
 | `tests/test_firefox_counting.py` | Regression tests for multi-window / multi-profile counting |
 | `tests/test_tabexport.py` | Tests for the CSV export (columns, quoting, Firefox extras) |
+| `tests/test_selfupdate.py` | Tests for the self-updater's pure logic (quoting, verify, team pin) |
 | `requirements.txt` | Runtime deps (`rumps`, `certifi`) |
 
 ---

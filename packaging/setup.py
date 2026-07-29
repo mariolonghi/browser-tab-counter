@@ -25,7 +25,7 @@ APP = [os.path.join(_SRC, "app.py")]
 OPTIONS = {
     "argv_emulation": False,          # menu-bar app; Carbon argv emulation not needed
     "includes": ["tabcount", "login_item", "appinfo", "permissions", "updates",
-                 "prefs", "history", "tabexport"],
+                 "prefs", "history", "tabexport", "selfupdate"],
     "packages": ["rumps", "certifi"],
     # We never use tkinter; excluding it drops the Tcl/Tk frameworks (smaller
     # bundle + fewer binaries for notarization to scrutinize).

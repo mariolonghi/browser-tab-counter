@@ -43,10 +43,12 @@ def _vtuple(tag: str) -> tuple[int, ...]:
 
 class UpdateStatus:
     def __init__(self, current: str, latest: str | None = None,
-                 url: str | None = None, error: str | None = None) -> None:
+                 url: str | None = None, asset_url: str | None = None,
+                 error: str | None = None) -> None:
         self.current = current
         self.latest = latest
         self.url = url or RELEASES_URL
+        self.asset_url = asset_url      # direct .dmg download URL (for self-update)
         self.error = error
 
     @property
@@ -79,8 +81,10 @@ def check(timeout: float = 3.0, use_cache: bool = True) -> UpdateStatus:
         with urllib.request.urlopen(req, timeout=timeout, context=_SSL_CONTEXT) as resp:
             data = json.load(resp)
         latest = (data.get("tag_name") or "").strip().lstrip("vV")
+        dmg = next((a.get("browser_download_url") for a in data.get("assets", [])
+                    if str(a.get("name", "")).lower().endswith(".dmg")), None)
         status = UpdateStatus(VERSION, latest=latest or None,
-                              url=data.get("html_url"))
+                              url=data.get("html_url"), asset_url=dmg)
     except Exception as exc:  # noqa: BLE001 - offline/timeout/rate-limit are non-fatal
         status = UpdateStatus(VERSION, error=f"{type(exc).__name__}: {exc}")
 

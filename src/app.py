@@ -24,6 +24,7 @@ import history
 import login_item
 import permissions
 import prefs
+import selfupdate
 import tabexport
 import updates
 from tabcount import BROWSERS, count_all, total_tabs
@@ -265,18 +266,33 @@ class TabCounterApp(rumps.App):
         body = build_about_text(self._last_counts, update_line=status.summary())
 
         if status.available:
-            # ok = download, cancel = close, other = website.
-            result = rumps.alert(
-                title="Browser Tab Counter",
-                message=body,
-                ok="Download update",
-                cancel="Close",
-                other="Visit mariolonghi.com",
-            )
-            if result == 1:
-                permissions.open_website(status.url)
-            elif result == -1:
-                permissions.open_website(appinfo.WEBSITE)
+            can_update, _why = selfupdate.can_self_update()
+            if can_update and status.asset_url:
+                # In-app self-update available: ok = install now, other = notes.
+                result = rumps.alert(
+                    title="Browser Tab Counter",
+                    message=body,
+                    ok=f"Update now to v{status.latest}",
+                    cancel="Later",
+                    other="Release notes",
+                )
+                if result == 1:
+                    self._do_self_update(status)
+                elif result == -1:
+                    permissions.open_website(status.url)
+            else:
+                # Fallback (running from source, or read-only install): open page.
+                result = rumps.alert(
+                    title="Browser Tab Counter",
+                    message=body,
+                    ok="Download update",
+                    cancel="Close",
+                    other="Visit mariolonghi.com",
+                )
+                if result == 1:
+                    permissions.open_website(status.url)
+                elif result == -1:
+                    permissions.open_website(appinfo.WEBSITE)
         else:
             result = rumps.alert(
                 title="Browser Tab Counter",
@@ -286,6 +302,32 @@ class TabCounterApp(rumps.App):
             )
             if result == -1:
                 permissions.open_website(appinfo.WEBSITE)
+
+    def _do_self_update(self, status) -> None:
+        """Download + verify + install the new version, then quit so the helper
+        can swap the bundle and relaunch us."""
+        try:
+            rumps.notification(
+                "Browser Tab Counter", f"Updating to v{status.latest}…",
+                "Downloading and verifying — the app will relaunch itself.",
+            )
+        except Exception:  # noqa: BLE001 - notifications need a bundle
+            pass
+        try:
+            selfupdate.perform_update(status.asset_url)
+        except selfupdate.UpdateError as exc:
+            result = rumps.alert(
+                "Update", f"Couldn't update automatically:\n{exc}",
+                ok="Open download page", cancel="Cancel",
+            )
+            if result == 1:
+                permissions.open_website(status.url)
+            return
+        except Exception as exc:  # noqa: BLE001
+            rumps.alert("Update", f"Update failed:\n{exc}")
+            return
+        # Staged and verified — quit so the detached helper swaps + relaunches.
+        rumps.quit_application()
 
     # ---- polling -----------------------------------------------------------
 
