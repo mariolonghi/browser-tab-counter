@@ -25,7 +25,7 @@ def ensure_dir() -> None:
 
 def load() -> dict:
     try:
-        data = json.loads(PREFS_PATH.read_text())
+        data = json.loads(PREFS_PATH.read_text(encoding="utf-8"))
         if isinstance(data, dict):
             return {**DEFAULTS, **data}
     except (OSError, ValueError):
@@ -41,7 +41,7 @@ def update(key: str, value) -> dict:
     ensure_dir()
     data = load()
     data[key] = value
-    PREFS_PATH.write_text(json.dumps(data, indent=2))
+    PREFS_PATH.write_text(json.dumps(data, indent=2), encoding="utf-8")
     return data
 
 

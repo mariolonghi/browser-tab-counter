@@ -63,7 +63,7 @@ def is_enabled() -> bool:
 
 def enable() -> None:
     PLIST_PATH.parent.mkdir(parents=True, exist_ok=True)
-    PLIST_PATH.write_text(_plist_xml(_program_arguments()))
+    PLIST_PATH.write_text(_plist_xml(_program_arguments()), encoding="utf-8")
     # Do NOT launchctl-load now (avoids a duplicate instance); it loads at login.
 
 
@@ -72,7 +72,7 @@ def disable() -> None:
         # Unload if it happens to be registered, then remove the file.
         subprocess.run(
             ["launchctl", "unload", str(PLIST_PATH)],
-            capture_output=True, text=True,
+            capture_output=True, encoding="utf-8", errors="replace",
         )
         PLIST_PATH.unlink(missing_ok=True)
 

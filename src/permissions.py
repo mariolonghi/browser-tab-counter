@@ -26,7 +26,7 @@ def reset_automation() -> tuple[bool, str]:
     """
     proc = subprocess.run(
         ["tccutil", "reset", "AppleEvents", BUNDLE_ID],
-        capture_output=True, text=True,
+        capture_output=True, encoding="utf-8", errors="replace",
     )
     msg = (proc.stdout or proc.stderr).strip()
     return proc.returncode == 0, msg

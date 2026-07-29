@@ -63,7 +63,7 @@ def _download(url: str, dest: Path, timeout: float = 180) -> None:
 def _mount(dmg: Path) -> Path:
     proc = subprocess.run(
         ["hdiutil", "attach", str(dmg), "-nobrowse", "-noautoopen"],
-        capture_output=True, text=True,
+        capture_output=True, encoding="utf-8", errors="replace",
     )
     if proc.returncode != 0:
         raise UpdateError(f"couldn't open the update image: {proc.stderr.strip()}")
@@ -89,11 +89,11 @@ def _find_app(mount: Path) -> Path:
 def verify_app(app: Path) -> None:
     """Reject anything not notarized AND signed by our Team ID."""
     gate = subprocess.run(["spctl", "-a", "-t", "exec", str(app)],
-                          capture_output=True, text=True)
+                          capture_output=True, encoding="utf-8", errors="replace")
     if gate.returncode != 0:
         raise UpdateError("the download isn't notarized / accepted by macOS")
     sig = subprocess.run(["codesign", "-dv", "--verbose=4", str(app)],
-                         capture_output=True, text=True)
+                         capture_output=True, encoding="utf-8", errors="replace")
     if f"TeamIdentifier={TEAM_ID}" not in (sig.stderr + sig.stdout):
         raise UpdateError("the download isn't signed by the expected developer")
 
@@ -130,7 +130,7 @@ open "$target"
 rm -rf "$workdir"
 """
     helper = workdir / "swap.sh"
-    helper.write_text(script)
+    helper.write_text(script, encoding="utf-8")
     helper.chmod(0o755)
     subprocess.Popen(
         ["/bin/bash", str(helper)],

@@ -38,6 +38,11 @@ OPTIONS = {
         "CFBundleShortVersionString": appinfo.VERSION,
         "LSUIElement": True,          # menu-bar only, no Dock icon / no app window
         "LSMinimumSystemVersion": "11.0",
+        # Run the frozen interpreter in UTF-8 mode. Launched from Finder an app
+        # inherits a C/POSIX locale, so without this, subprocess text output and
+        # file I/O would default to ASCII and crash on non-ASCII (em dashes,
+        # accents, emoji…). Belt-and-suspenders with per-call encoding="utf-8".
+        "LSEnvironment": {"PYTHONUTF8": "1", "PYTHONIOENCODING": "utf-8"},
         "NSHumanReadableCopyright": "© 2026 Mario Longhi",
         "NSAppleEventsUsageDescription": (
             "Browser Tab Counter reads how many tabs are open in your browsers "

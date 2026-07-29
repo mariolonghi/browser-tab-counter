@@ -11,7 +11,7 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-VERSION = "0.6.1"  # menu width cap; README mockup fixes
+VERSION = "0.6.2"  # force UTF-8 everywhere (fix ASCII decode in self-update etc.)
 APP_NAME = "Browser Tab Counter"
 BUNDLE_ID = "com.mariolonghi.browsertabcounter"
 WEBSITE = "https://mariolonghi.com"
