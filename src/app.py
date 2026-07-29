@@ -105,7 +105,7 @@ class TabCounterApp(rumps.App):
 
         self.menu.add(rumps.separator)
         self.menu.add(rumps.MenuItem("Refresh now", callback=self.refresh))
-        self.menu.add(rumps.MenuItem("Export open tabs to CSV…",
+        self.menu.add(rumps.MenuItem("Export open tabs…",
                                      callback=self.export_tabs))
 
         threshold = prefs.get("threshold", 0)
@@ -249,12 +249,32 @@ class TabCounterApp(rumps.App):
                         "No open tabs found in the running browsers.")
             return
 
-        default_name = f"{appinfo.APP_NAME} - open tabs - {datetime.now():%Y-%m-%d-%H%M%S}.csv"
+        # Let the user pick a format. ok = CSV, other = HTML, cancel = abort.
+        choice = rumps.alert(
+            title="Export Open Tabs",
+            message=f"{len(rows)} open tab(s) found.\n\nChoose a format:\n\n"
+                    "• Spreadsheet (CSV) — open in Numbers, Excel, anything.\n"
+                    "• Web page (HTML) — a sortable table with clickable links, "
+                    "viewable in any browser.",
+            ok="Spreadsheet (CSV)",
+            cancel="Cancel",
+            other="Web page (HTML)",
+        )
+        if choice == 0:                       # cancelled
+            return
+        as_html = (choice == -1)
+        ext = "html" if as_html else "csv"
+
+        default_name = (f"{appinfo.APP_NAME} - open tabs - "
+                        f"{datetime.now():%Y-%m-%d-%H%M%S}.{ext}")
         path = self._ask_save_path(default_name, title="Export Open Tabs")
         if not path:
             return
         try:
-            tabexport.write_csv(rows, path)
+            if as_html:
+                tabexport.write_html(rows, path)
+            else:
+                tabexport.write_csv(rows, path)
         except OSError as exc:
             rumps.alert("Export Open Tabs", f"Couldn't write the file:\n{exc}")
             return

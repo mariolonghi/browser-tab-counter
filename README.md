@@ -21,7 +21,7 @@ menu bar:  … ⧉ 8  🔋  🔎  Wed 16:32     (⧉ ⚠️ 8 when over your ale
               │ Today ▁▂▃▅▇▆▄  5-61 · avg 34       │ ← click to save
               ├────────────────────────────────────┤
               │ Refresh now                        │
-              │ Export open tabs to CSV…           │
+              │ Export open tabs…                  │
               │ Alert threshold: off               │
               │ Permissions                      ▸ │
               │ ✓ Launch at Login                  │
@@ -95,16 +95,25 @@ The app samples the total every few minutes into a small, capped local file
 **Click the sparkline** to save a copy of that history as a CSV wherever you
 like 🆕.
 
-### 📄 Export open tabs to CSV 🆕
+### 📄 Export open tabs
 
-Menu → **Export open tabs to CSV…** takes a snapshot of every tab open *right
-now* and saves it wherever you choose. Each row captures as much as the browser
-exposes: `browser, window, tab, active, pinned, loading, window_mode,
-last_accessed, title, url`. This is the one action that reads tab **titles and
-URLs** — so it's **on demand only** (nothing is gathered until you click it),
-**read-only**, and **local** (the file goes only where you save it; nothing is
-kept or sent). Private/incognito windows aren't included (browsers don't expose
-them).
+Menu → **Export open tabs…** takes a snapshot of every tab open *right now* and
+saves it wherever you choose. It asks which format you'd like 🆕:
+
+- **Spreadsheet (CSV)** — open it in Numbers, Excel, or anything else.
+- **Web page (HTML)** 🆕 — a self-contained page you can just double-click: the
+  same data as a table, with **clickable links** and **sortable columns** (click
+  a heading to sort, click again to reverse). It works offline and loads nothing
+  from the internet; the only script in it is the column sorting.
+
+Either way each row captures as much as the browser exposes: `browser, window,
+tab, active, pinned, loading, window_mode, last_accessed, title, url`, and the
+file ends with a short note saying which version of the app generated it.
+
+This is the one action that reads tab **titles and URLs** — so it's **on demand
+only** (nothing is gathered until you click it), **read-only**, and **local**
+(the file goes only where you save it; nothing is kept or sent).
+Private/incognito windows aren't included (browsers don't expose them).
 
 ### ⭐ Launch at login
 

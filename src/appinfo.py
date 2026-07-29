@@ -11,7 +11,7 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-VERSION = "0.7.0"  # security hardening + clickable history sparkline
+VERSION = "0.8.0"  # export format chooser: CSV or sortable HTML report
 APP_NAME = "Browser Tab Counter"
 BUNDLE_ID = "com.mariolonghi.browsertabcounter"
 WEBSITE = "https://mariolonghi.com"
