@@ -61,11 +61,14 @@ class UpdateStatus:
 
     def summary(self) -> str:
         """One-line status for the About panel."""
+        from i18n import _
         if not self.checked:
-            return "Update check unavailable (offline?)"
+            return _("Update check unavailable (offline?)")
         if self.available:
-            return f"⬆ Update available: v{self.latest} (you have v{self.current})"
-        return f"✓ You're on the latest version (v{self.current})"
+            return _("⬆ Update available: v{latest} (you have v{current})").format(
+                latest=self.latest, current=self.current)
+        return _("✓ You're on the latest version (v{current})").format(
+            current=self.current)
 
 
 def check(timeout: float = 3.0, use_cache: bool = True) -> UpdateStatus:

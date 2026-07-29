@@ -23,6 +23,7 @@ from datetime import datetime
 
 import appinfo
 import tabcount
+from i18n import _, format_datetime, ngettext
 
 # Control-char delimiters — vanishingly unlikely inside a title/URL.
 _FS = "\x1f"
@@ -331,12 +332,12 @@ def _cell_html(field: str, value) -> str:
 def write_html(rows: list[Tab], path: str, generated: datetime | None = None) -> int:
     """Write a self-contained HTML report: one row per tab, sortable columns,
     clickable links. No external assets, so it works offline from disk."""
-    when = (generated or datetime.now()).strftime("%d %b %Y at %H:%M")
+    when = format_datetime(generated or datetime.now())
     browsers = sorted({r.browser for r in rows})
 
     head = "".join(
         f"<th data-numeric='{1 if f in _NUMERIC_FIELDS else 0}'>"
-        f"{html.escape(f.replace('_', ' '))} <span class='arrow'></span></th>"
+        f"{html.escape(_(f.replace(chr(95), chr(32))))} <span class='arrow'></span></th>"
         for f in _HTML_FIELDS
     )
     body = "\n".join(
@@ -353,9 +354,8 @@ def write_html(rows: list[Tab], path: str, generated: datetime | None = None) ->
 <style>{_HTML_STYLE}</style>
 </head>
 <body>
-<h1>Open browser tabs</h1>
-<p class="meta">{len(rows)} tab(s) across {html.escape(', '.join(browsers)) or 'no browsers'}
- &middot; captured {html.escape(when)} &middot; click a column heading to sort</p>
+<h1>{_('Open browser tabs')}</h1>
+<p class="meta">{html.escape(ngettext("{n} tab across {browsers} · captured {when} · click a column heading to sort", "{n} tabs across {browsers} · captured {when} · click a column heading to sort", len(rows)).format(n=len(rows), browsers=", ".join(browsers) or _("no browsers"), when=when))}</p>
 <div class="wrap">
 <table>
 <thead><tr>{head}</tr></thead>

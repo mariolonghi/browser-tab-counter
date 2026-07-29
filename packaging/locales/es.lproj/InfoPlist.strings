@@ -1,0 +1,2 @@
+/* Lo muestra macOS en el aviso de permiso de Automatización. */
+"NSAppleEventsUsageDescription" = "Browser Tab Counter lee cuántas pestañas tienes abiertas en tus navegadores para poder mostrar el total en la barra de menús.";

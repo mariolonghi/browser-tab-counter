@@ -1,0 +1,2 @@
+/* Visas av macOS i dialogen för Automation-behörighet. */
+"NSAppleEventsUsageDescription" = "Browser Tab Counter läser hur många flikar som är öppna i dina webbläsare för att kunna visa totalsumman i menyraden.";

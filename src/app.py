@@ -28,6 +28,7 @@ import prefs
 import selfupdate
 import tabexport
 import updates
+from i18n import _, format_date, ngettext
 from tabcount import BROWSERS, count_all, total_tabs
 
 POLL_SECONDS = appinfo.POLL_SECONDS
@@ -39,35 +40,35 @@ _METHOD = {b.name: b.method for b in BROWSERS}
 def build_about_text(counts, update_line: str | None = None) -> str:
     """Assemble the About/troubleshoot panel text from a list of BrowserCount."""
     inst = appinfo.install_date()
-    inst_s = inst.strftime("%d %b %Y") if inst else "unknown"
+    inst_s = format_date(inst) if inst else "—"
 
     perm_lines = []
     for c in counts:
         if not c.running:
             continue
         if _METHOD.get(c.name) == "firefox":
-            perm_lines.append(f"   • {c.name}: session file (no prompt)")
+            perm_lines.append(f"   • {c.name}: {_('session file (no prompt)')}")
         elif c.tabs is not None:
-            perm_lines.append(f"   • {c.name}: granted ✓")
+            perm_lines.append(f"   • {c.name}: {_('granted ✓')}")
         else:
-            perm_lines.append(f"   • {c.name}: needs permission ✗")
+            perm_lines.append(f"   • {c.name}: {_('needs permission ✗')}")
     if not perm_lines:
-        perm_lines = ["   • (no supported browsers running)"]
+        perm_lines = [f"   • {_('(no supported browsers running)')}"]
 
-    version_block = f"Version {appinfo.VERSION}\n"
+    version_block = _("Version {version}").format(version=appinfo.VERSION) + "\n"
     if update_line:
         version_block += f"{update_line}\n"
 
     return (
         version_block
         + f"{appinfo.BUNDLE_ID}\n"
-        f"Installed: {inst_s}\n"
-        f"Polls every {appinfo.POLL_SECONDS}s\n"
+        + _("Installed: {date}").format(date=inst_s) + "\n"
+        + _("Polls every {n}s").format(n=appinfo.POLL_SECONDS) + "\n"
         "\n"
-        "Browser permissions (Automation):\n"
+        + _("Browser permissions (Automation):") + "\n"
         + "\n".join(perm_lines)
         + "\n\n"
-        "Developer: Mario Longhi — mariolonghi.com"
+        + _("Developer: Mario Longhi — mariolonghi.com")
     )
 
 
@@ -89,13 +90,14 @@ class TabCounterApp(rumps.App):
         """Rebuild the whole dropdown. Simple and race-free."""
         self.menu.clear()
         if not active_counts:
-            header = "Counting…" if first else "No browsers running"
+            header = _("Counting…") if first else _("No browsers running")
             self.menu.add(rumps.MenuItem(header))
         else:
-            self.menu.add(rumps.MenuItem(f"{total} tab(s) total"))
+            self.menu.add(rumps.MenuItem(
+                ngettext("{n} tab total", "{n} tabs total", total).format(n=total)))
             self.menu.add(rumps.separator)
             for c in active_counts:
-                value = c.tabs if c.tabs is not None else "— (permission?)"
+                value = c.tabs if c.tabs is not None else _("— (permission?)")
                 self.menu.add(rumps.MenuItem(f"{c.name}:  {value}"))
 
         # Tabs-over-time summary — click it to download the history CSV.
@@ -104,30 +106,31 @@ class TabCounterApp(rumps.App):
                                      callback=self.download_history))
 
         self.menu.add(rumps.separator)
-        self.menu.add(rumps.MenuItem("Refresh now", callback=self.refresh))
-        self.menu.add(rumps.MenuItem("Export open tabs…",
+        self.menu.add(rumps.MenuItem(_("Refresh now"), callback=self.refresh))
+        self.menu.add(rumps.MenuItem(_("Export open tabs…"),
                                      callback=self.export_tabs))
 
         threshold = prefs.get("threshold", 0)
-        label = f"Alert threshold: {threshold}" if threshold else "Alert threshold: off"
+        label = (_("Alert threshold: {n}").format(n=threshold) if threshold
+                 else _("Alert threshold: off"))
         self.menu.add(rumps.MenuItem(label, callback=self.set_threshold))
 
         # Permissions submenu.
-        perms = rumps.MenuItem("Permissions")
-        perms.add(rumps.MenuItem("Re-request browser permissions",
+        perms = rumps.MenuItem(_("Permissions"))
+        perms.add(rumps.MenuItem(_("Re-request browser permissions"),
                                  callback=self.rerequest_permissions))
-        perms.add(rumps.MenuItem("Open Automation settings…",
+        perms.add(rumps.MenuItem(_("Open Automation settings…"),
                                  callback=self.open_permission_settings))
         self.menu.add(perms)
 
-        login = rumps.MenuItem("Launch at Login", callback=self.toggle_login)
+        login = rumps.MenuItem(_("Launch at Login"), callback=self.toggle_login)
         login.state = 1 if login_item.is_enabled() else 0
         self.menu.add(login)
 
         self.menu.add(rumps.separator)
-        self.menu.add(rumps.MenuItem("About Browser Tab Counter",
+        self.menu.add(rumps.MenuItem(_("About {app}").format(app=appinfo.APP_NAME),
                                      callback=self.show_about))
-        self.menu.add(rumps.MenuItem("Quit", callback=rumps.quit_application))
+        self.menu.add(rumps.MenuItem(_("Quit"), callback=rumps.quit_application))
 
     # ---- actions -----------------------------------------------------------
 
@@ -149,7 +152,8 @@ class TabCounterApp(rumps.App):
         try:
             now_on = login_item.toggle()
         except Exception as exc:  # noqa: BLE001 - surface, don't crash the menu bar
-            rumps.alert("Launch at Login", f"Couldn't update setting:\n{exc}")
+            rumps.alert(_("Launch at Login"),
+                        _("Couldn't update setting:\n{error}").format(error=exc))
             return
         sender.state = 1 if now_on else 0
 
@@ -165,25 +169,25 @@ class TabCounterApp(rumps.App):
         # Firing a count now triggers fresh Automation prompts for running browsers.
         self.refresh(None)
         if ok:
-            body = (
+            body = _(
                 "Cleared the previous Automation choices.\n\n"
                 "macOS will now ask again the next time each browser is "
                 "checked — click Allow on those prompts.\n\n"
                 "If nothing appears, use “Open Automation settings…” and enable "
-                "each browser under “Browser Tab Counter”."
-            )
+                "each browser under “{app}”."
+            ).format(app=appinfo.APP_NAME)
         else:
             body = (
-                "Couldn't reset the permissions automatically"
+                _("Couldn't reset the permissions automatically")
                 + (f":\n{msg}\n\n" if msg else ".\n\n")
-                + "Open Automation settings and toggle each browser under "
-                "“Browser Tab Counter”."
+                + _("Open Automation settings and enable each browser under "
+                    "“{app}”.").format(app=appinfo.APP_NAME)
             )
         result = rumps.alert(
-            title="Re-request Browser Permissions",
+            title=_("Re-request Browser Permissions"),
             message=body,
-            ok="OK",
-            other="Open Automation settings…",
+            ok=_("OK"),
+            other=_("Open Automation settings…"),
         )
         if result == -1:
             permissions.open_automation_settings()
@@ -194,12 +198,12 @@ class TabCounterApp(rumps.App):
     def set_threshold(self, _sender) -> None:
         current = prefs.get("threshold", 0)
         window = rumps.Window(
-            message="Show ⚠️ and notify once when the total goes above this many "
-                    "tabs.\nEnter 0 to turn the alert off.",
-            title="Alert Threshold",
+            message=_("Show ⚠️ and notify once when the total goes above this "
+                      "many tabs.\nEnter 0 to turn the alert off."),
+            title=_("Alert Threshold"),
             default_text=str(current),
-            ok="Save",
-            cancel="Cancel",
+            ok=_("Save"),
+            cancel=_("Cancel"),
             dimensions=(120, 22),
         )
         response = window.run()
@@ -208,8 +212,8 @@ class TabCounterApp(rumps.App):
         try:
             value = max(0, int(response.text.strip()))
         except ValueError:
-            rumps.alert("Alert Threshold",
-                        "Please enter a whole number (0 turns the alert off).")
+            rumps.alert(_("Alert Threshold"),
+                        _("Please enter a whole number (0 turns the alert off)."))
             return
         prefs.update("threshold", value)
         self._was_over = False        # re-arm so it can fire again
@@ -218,18 +222,19 @@ class TabCounterApp(rumps.App):
     def download_history(self, _sender) -> None:
         """Save a copy of the tab-count history CSV wherever the user chooses."""
         if not history.HISTORY_PATH.exists():
-            rumps.alert("Tab History",
-                        "No history recorded yet — it starts filling in within a "
-                        "few minutes of running.")
+            rumps.alert(_("Tab History"),
+                        _("No history recorded yet — it starts filling in within "
+                          "a few minutes of running."))
             return
-        default_name = f"{appinfo.APP_NAME} - tab history - {datetime.now():%Y-%m-%d}.csv"
-        path = self._ask_save_path(default_name, title="Save Tab History")
+        default_name = f"{appinfo.APP_NAME} - {_('tab history')} - {datetime.now():%Y-%m-%d}.csv"
+        path = self._ask_save_path(default_name, title=_("Save Tab History"))
         if not path:
             return
         try:
             shutil.copyfile(history.HISTORY_PATH, path)
         except OSError as exc:
-            rumps.alert("Tab History", f"Couldn't save the file:\n{exc}")
+            rumps.alert(_("Tab History"),
+                        _("Couldn't save the file:\n{error}").format(error=exc))
             return
         subprocess.run(["open", "-R", path], capture_output=True)  # reveal in Finder
 
@@ -242,32 +247,39 @@ class TabCounterApp(rumps.App):
         try:
             rows = tabexport.gather_all()
         except Exception as exc:  # noqa: BLE001 - never crash the menu bar
-            rumps.alert("Export Open Tabs", f"Couldn't read the open tabs:\n{exc}")
+            rumps.alert(_("Export Open Tabs"),
+                        _("Couldn't read the open tabs:\n{error}").format(error=exc))
             return
         if not rows:
-            rumps.alert("Export Open Tabs",
-                        "No open tabs found in the running browsers.")
+            rumps.alert(_("Export Open Tabs"),
+                        _("No open tabs found in the running browsers."))
             return
 
         # Let the user pick a format. ok = CSV, other = HTML, cancel = abort.
         choice = rumps.alert(
-            title="Export Open Tabs",
-            message=f"{len(rows)} open tab(s) found.\n\nChoose a format:\n\n"
-                    "• Spreadsheet (CSV) — open in Numbers, Excel, anything.\n"
-                    "• Web page (HTML) — a sortable table with clickable links, "
-                    "viewable in any browser.",
-            ok="Spreadsheet (CSV)",
-            cancel="Cancel",
-            other="Web page (HTML)",
+            title=_("Export Open Tabs"),
+            message=ngettext(
+                "{n} open tab found.\n\nChoose a format:\n\n"
+                "• Spreadsheet (CSV) — open in Numbers, Excel, anything.\n"
+                "• Web page (HTML) — a sortable table with clickable links, "
+                "viewable in any browser.",
+                "{n} open tabs found.\n\nChoose a format:\n\n"
+                "• Spreadsheet (CSV) — open in Numbers, Excel, anything.\n"
+                "• Web page (HTML) — a sortable table with clickable links, "
+                "viewable in any browser.",
+                len(rows)).format(n=len(rows)),
+            ok=_("Spreadsheet (CSV)"),
+            cancel=_("Cancel"),
+            other=_("Web page (HTML)"),
         )
         if choice == 0:                       # cancelled
             return
         as_html = (choice == -1)
         ext = "html" if as_html else "csv"
 
-        default_name = (f"{appinfo.APP_NAME} - open tabs - "
+        default_name = (f"{appinfo.APP_NAME} - {_('open tabs')} - "
                         f"{datetime.now():%Y-%m-%d-%H%M%S}.{ext}")
-        path = self._ask_save_path(default_name, title="Export Open Tabs")
+        path = self._ask_save_path(default_name, title=_("Export Open Tabs"))
         if not path:
             return
         try:
@@ -276,7 +288,8 @@ class TabCounterApp(rumps.App):
             else:
                 tabexport.write_csv(rows, path)
         except OSError as exc:
-            rumps.alert("Export Open Tabs", f"Couldn't write the file:\n{exc}")
+            rumps.alert(_("Export Open Tabs"),
+                        _("Couldn't write the file:\n{error}").format(error=exc))
             return
         subprocess.run(["open", "-R", path], capture_output=True)  # reveal in Finder
 
@@ -298,9 +311,9 @@ class TabCounterApp(rumps.App):
     def _notify_threshold(self, total: int, threshold: int) -> None:
         try:
             rumps.notification(
-                title="Browser Tab Counter",
-                subtitle=f"Over your {threshold}-tab limit",
-                message=f"You have {total} tabs open.",
+                title=appinfo.APP_NAME,
+                subtitle=_("Over your {n}-tab limit").format(n=threshold),
+                message=_("You have {n} tabs open.").format(n=total),
             )
         except Exception:  # noqa: BLE001 - notifications need a bundle; never crash
             pass
@@ -317,9 +330,9 @@ class TabCounterApp(rumps.App):
                 result = rumps.alert(
                     title="Browser Tab Counter",
                     message=body,
-                    ok=f"Update now to v{status.latest}",
-                    cancel="Later",
-                    other="Release notes",
+                    ok=_("Update now to v{latest}").format(latest=status.latest),
+                    cancel=_("Later"),
+                    other=_("Release notes"),
                 )
                 if result == 1:
                     self._do_self_update(status)
@@ -330,9 +343,9 @@ class TabCounterApp(rumps.App):
                 result = rumps.alert(
                     title="Browser Tab Counter",
                     message=body,
-                    ok="Download update",
-                    cancel="Close",
-                    other="Visit mariolonghi.com",
+                    ok=_("Download update"),
+                    cancel=_("Close"),
+                    other=_("Visit mariolonghi.com"),
                 )
                 if result == 1:
                     permissions.open_website(status.url)
@@ -342,8 +355,8 @@ class TabCounterApp(rumps.App):
             result = rumps.alert(
                 title="Browser Tab Counter",
                 message=body,
-                ok="OK",
-                other="Visit mariolonghi.com",
+                ok=_("OK"),
+                other=_("Visit mariolonghi.com"),
             )
             if result == -1:
                 permissions.open_website(appinfo.WEBSITE)
@@ -353,8 +366,9 @@ class TabCounterApp(rumps.App):
         can swap the bundle and relaunch us."""
         try:
             rumps.notification(
-                "Browser Tab Counter", f"Updating to v{status.latest}…",
-                "Downloading and verifying — the app will relaunch itself.",
+                appinfo.APP_NAME,
+                _("Updating to v{latest}…").format(latest=status.latest),
+                _("Downloading and verifying — the app will relaunch itself."),
             )
         except Exception:  # noqa: BLE001 - notifications need a bundle
             pass
@@ -362,14 +376,16 @@ class TabCounterApp(rumps.App):
             selfupdate.perform_update(status.asset_url)
         except selfupdate.UpdateError as exc:
             result = rumps.alert(
-                "Update", f"Couldn't update automatically:\n{exc}",
-                ok="Open download page", cancel="Cancel",
+                _("Update"),
+                _("Couldn't update automatically:\n{error}").format(error=exc),
+                ok=_("Open download page"), cancel=_("Cancel"),
             )
             if result == 1:
                 permissions.open_website(status.url)
             return
         except Exception as exc:  # noqa: BLE001
-            rumps.alert("Update", f"Update failed:\n{exc}")
+            rumps.alert(_("Update"),
+                        _("Update failed:\n{error}").format(error=exc))
             return
         # Staged and verified — quit so the detached helper swaps + relaunches.
         rumps.quit_application()

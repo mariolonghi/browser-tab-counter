@@ -23,6 +23,7 @@ import urllib.request
 from pathlib import Path
 
 import appinfo
+from i18n import _
 
 TEAM_ID = "ZWXAL8XA46"   # pinned: only ever install builds signed by us
 
@@ -45,12 +46,12 @@ class UpdateError(Exception):
 def can_self_update() -> tuple[bool, str]:
     """Whether an in-place self-update can apply in this run."""
     if not appinfo.is_frozen():
-        return False, "running from source"
+        return False, _("running from source")
     app = appinfo.bundle_path()
     if app.suffix != ".app":
-        return False, "not an .app bundle"
+        return False, _("not an .app bundle")
     if not os.access(app, os.W_OK) or not os.access(app.parent, os.W_OK):
-        return False, "the install location isn't writable"
+        return False, _("the install location isn't writable")
     return True, ""
 
 
@@ -65,7 +66,7 @@ def _check_url(url: str) -> None:
     if parsed.scheme != "https" or not (
         host in _ALLOWED_HOSTS or host.endswith(".githubusercontent.com")
     ):
-        raise UpdateError("unexpected update URL — refusing to download")
+        raise UpdateError(_("unexpected update URL, refusing to download"))
 
 
 def _download(url: str, dest: Path, timeout: float = 180) -> None:
@@ -80,7 +81,7 @@ def _download(url: str, dest: Path, timeout: float = 180) -> None:
             while chunk := r.read(1024 * 1024):
                 written += len(chunk)
                 if written > _MAX_DOWNLOAD_BYTES:
-                    raise UpdateError("update download is unexpectedly large")
+                    raise UpdateError(_("update download is unexpectedly large"))
                 f.write(chunk)
 
 
@@ -95,7 +96,7 @@ def _mount(dmg: Path) -> Path:
         parts = line.split("\t")
         if parts and parts[-1].startswith("/Volumes/"):
             return Path(parts[-1].strip())
-    raise UpdateError("couldn't find the mounted update volume")
+    raise UpdateError(_("couldn't find the mounted update volume"))
 
 
 def _unmount(mount: Path) -> None:
@@ -107,7 +108,7 @@ def _find_app(mount: Path) -> Path:
     for p in mount.iterdir():
         if p.suffix == ".app":
             return p
-    raise UpdateError("no application found inside the update")
+    raise UpdateError(_("no application found inside the update"))
 
 
 def verify_app(app: Path) -> None:
@@ -123,15 +124,15 @@ def verify_app(app: Path) -> None:
         ["codesign", "--verify", "--deep", "--strict", str(app)],
         capture_output=True, encoding="utf-8", errors="replace")
     if integ.returncode != 0:
-        raise UpdateError("the download's code signature is invalid")
+        raise UpdateError(_("the download's code signature is invalid"))
     gate = subprocess.run(["spctl", "-a", "-t", "exec", str(app)],
                           capture_output=True, encoding="utf-8", errors="replace")
     if gate.returncode != 0:
-        raise UpdateError("the download isn't notarized / accepted by macOS")
+        raise UpdateError(_("the download isn't notarized / accepted by macOS"))
     sig = subprocess.run(["codesign", "-dv", "--verbose=4", str(app)],
                          capture_output=True, encoding="utf-8", errors="replace")
     if f"TeamIdentifier={TEAM_ID}" not in (sig.stderr + sig.stdout):
-        raise UpdateError("the download isn't signed by the expected developer")
+        raise UpdateError(_("the download isn't signed by the expected developer"))
 
 
 # --------------------------------------------------------------------------

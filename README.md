@@ -122,6 +122,16 @@ Private/incognito windows aren't included (browsers don't expose them).
 to toggle it off (the checkmark disappears), and it stays off. No admin required —
 it uses a per-user LaunchAgent.
 
+### 🌍 Languages 🆕
+
+The app speaks **English, Swedish, Spanish and German**, and picks whichever
+your Mac prefers — no setting to find. Menus, dialogs, the About panel, the
+permission prompt and the exported HTML report are all translated, and dates
+follow your language too.
+
+Want a different one just for this app? **System Settings → General → Language
+& Region → Applications → +**, pick *Browser Tab Counter* and a language.
+
 ### Quit
 
 Click the `⧉` menu → **Quit**.
@@ -196,6 +206,9 @@ tests/        regression tests
 | `src/updates.py` | Check GitHub Releases for a newer version (certifi-backed HTTPS) |
 | `src/selfupdate.py` | In-app self-update: download → verify (notarized + Team ID) → swap → relaunch |
 | `src/prefs.py` | Local settings store (`prefs.json`) — threshold, etc. |
+| `src/i18n.py` | Language detection (macOS `AppleLanguages`) + `_()` / plurals / dates |
+| `src/translations.py` | Swedish, Spanish and German catalogues (English is the source) |
+| `packaging/locales/` | `InfoPlist.strings` per language — the Automation prompt text |
 | `src/history.py` | Tabs-over-time sampling → capped `history.csv` + sparkline |
 | `src/tabexport.py` | On-demand snapshot of all open tabs → CSV (title/URL + extras) |
 | `src/login_item.py` | Launch-at-login toggle (per-user LaunchAgent) |
@@ -205,6 +218,7 @@ tests/        regression tests
 | `tests/test_firefox_counting.py` | Regression tests for multi-window / multi-profile counting |
 | `tests/test_tabexport.py` | Tests for the CSV export (columns, quoting, Firefox extras) |
 | `tests/test_selfupdate.py` | Tests for the self-updater's pure logic (quoting, verify, team pin) |
+| `tests/test_i18n.py` | Translation coverage, placeholders, plurals, English fallback |
 | `requirements.txt` | Runtime deps (`rumps`, `certifi`) |
 
 ---

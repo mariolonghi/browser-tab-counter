@@ -1,0 +1,2 @@
+/* Wird von macOS im Dialog für die Automatisierungs-Berechtigung angezeigt. */
+"NSAppleEventsUsageDescription" = "Browser Tab Counter liest, wie viele Tabs in deinen Browsern geöffnet sind, um die Gesamtzahl in der Menüleiste anzuzeigen.";

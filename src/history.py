@@ -13,6 +13,7 @@ from datetime import datetime
 from pathlib import Path
 
 import prefs
+from i18n import _
 
 HISTORY_PATH: Path = prefs.APP_SUPPORT / "history.csv"
 SAMPLE_INTERVAL = 300          # seconds between samples (5 min)
@@ -105,10 +106,10 @@ def menu_summary(max_width: int = _MAX_WIDTH) -> str:
     """
     vals = today_samples()
     if not vals:
-        return "Tab history: collecting…"
+        return _("Tab history: collecting…")
     lo, hi, avg = min(vals), max(vals), round(sum(vals) / len(vals))
-    prefix = "Today "
-    suffix = f"  {lo}-{hi} · avg {avg}"
+    prefix = _("Today") + " "
+    suffix = f"  {lo}-{hi} · {_('avg')} {avg}"
     budget = max(8, max_width - len(prefix) - len(suffix))
     spark = sparkline(vals[-budget:])
     return f"{prefix}{spark}{suffix}"

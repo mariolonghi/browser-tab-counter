@@ -1,0 +1,2 @@
+/* Shown by macOS in the Automation permission prompt. */
+"NSAppleEventsUsageDescription" = "Browser Tab Counter reads how many tabs are open in your browsers so it can show the total in the menu bar.";
