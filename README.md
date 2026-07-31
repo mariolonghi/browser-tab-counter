@@ -141,7 +141,7 @@ Click the `⧉` menu → **Quit**.
 ## Shoutout
 
 This project is a hyper simplified use case around tab usage.
-There are much more complete tab-manager available in the market. Special shout-out to [auspy](https://github.com/auspy) who maintains the SupaSidebar tool.
+There are much more complete tab-manager available in the market. Special shout-out to [auspy](https://github.com/auspy) who maintains the **SupaSidebar** tool.
 
 ---
 
