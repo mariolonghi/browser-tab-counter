@@ -21,7 +21,7 @@ menu bar:  … ⧉ 8  🔋  🔎  Wed 16:32     (⧉ ⚠️ 8 when over your ale
               │ Today ▁▂▃▅▇▆▄  5-61 · avg 34       │ ← click to save
               ├────────────────────────────────────┤
               │ Refresh now                        │
-              │ Export open tabs…                  │
+              │ Export open tabs… (csv or HTML)    │
               │ Alert threshold: off               │
               │ Permissions                      ▸ │
               │ ✓ Launch at Login                  │
