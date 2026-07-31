@@ -111,6 +111,22 @@ def _find_app(mount: Path) -> Path:
     raise UpdateError(_("no application found inside the update"))
 
 
+def _run_check(cmd: list[str]) -> subprocess.CompletedProcess:
+    """Run a verification tool, failing CLOSED if it can't be run at all.
+
+    If codesign/spctl are missing or unusable (a non-macOS host, a stripped
+    system), we must refuse the update rather than let an unverified bundle
+    through — and report it as a clean UpdateError, not a raw OSError.
+    """
+    try:
+        return subprocess.run(cmd, capture_output=True,
+                              encoding="utf-8", errors="replace", timeout=120)
+    except (OSError, subprocess.SubprocessError) as exc:
+        raise UpdateError(
+            _("couldn't verify the download (verification tools unavailable)")
+        ) from exc
+
+
 def verify_app(app: Path) -> None:
     """Reject anything that isn't a valid, notarized app signed by our Team ID.
 
@@ -120,17 +136,13 @@ def verify_app(app: Path) -> None:
       2. spctl -a -t exec — Gatekeeper accepts it (Developer ID + notarized).
       3. TeamIdentifier — the signer is US, not just any notarized developer.
     """
-    integ = subprocess.run(
-        ["codesign", "--verify", "--deep", "--strict", str(app)],
-        capture_output=True, encoding="utf-8", errors="replace")
+    integ = _run_check(["codesign", "--verify", "--deep", "--strict", str(app)])
     if integ.returncode != 0:
         raise UpdateError(_("the download's code signature is invalid"))
-    gate = subprocess.run(["spctl", "-a", "-t", "exec", str(app)],
-                          capture_output=True, encoding="utf-8", errors="replace")
+    gate = _run_check(["spctl", "-a", "-t", "exec", str(app)])
     if gate.returncode != 0:
         raise UpdateError(_("the download isn't notarized / accepted by macOS"))
-    sig = subprocess.run(["codesign", "-dv", "--verbose=4", str(app)],
-                         capture_output=True, encoding="utf-8", errors="replace")
+    sig = _run_check(["codesign", "-dv", "--verbose=4", str(app)])
     if f"TeamIdentifier={TEAM_ID}" not in (sig.stderr + sig.stdout):
         raise UpdateError(_("the download isn't signed by the expected developer"))
 

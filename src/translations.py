@@ -176,6 +176,8 @@ SV: dict[str, str] = {
         "kunde inte hitta den monterade uppdateringsvolymen",
     "no application found inside the update":
         "ingen app hittades i uppdateringen",
+    "couldn't verify the download (verification tools unavailable)":
+        "kunde inte verifiera hämtningen (verktygen är inte tillgängliga)",
     "the download's code signature is invalid":
         "hämtningens kodsignatur är ogiltig",
     "the download isn't notarized / accepted by macOS":
@@ -339,6 +341,8 @@ ES: dict[str, str] = {
         "no se encontró el volumen de actualización montado",
     "no application found inside the update":
         "no se encontró ninguna app dentro de la actualización",
+    "couldn't verify the download (verification tools unavailable)":
+        "no se pudo verificar la descarga (herramientas no disponibles)",
     "the download's code signature is invalid":
         "la firma de código de la descarga no es válida",
     "the download isn't notarized / accepted by macOS":
@@ -505,6 +509,8 @@ DE: dict[str, str] = {
         "das eingebundene Update-Volume wurde nicht gefunden",
     "no application found inside the update":
         "im Update wurde keine App gefunden",
+    "couldn't verify the download (verification tools unavailable)":
+        "Download konnte nicht geprüft werden (Prüfwerkzeuge nicht verfügbar)",
     "the download's code signature is invalid":
         "die Codesignatur des Downloads ist ungültig",
     "the download isn't notarized / accepted by macOS":
@@ -673,6 +679,8 @@ FR: dict[str, str] = {
         "impossible de trouver le volume de mise à jour monté",
     "no application found inside the update":
         "aucune application trouvée dans la mise à jour",
+    "couldn't verify the download (verification tools unavailable)":
+        "impossible de vérifier le téléchargement (outils indisponibles)",
     "the download's code signature is invalid":
         "la signature de code du téléchargement est invalide",
     "the download isn't notarized / accepted by macOS":
@@ -838,6 +846,8 @@ PT: dict[str, str] = {
         "não foi possível encontrar o volume de atualização montado",
     "no application found inside the update":
         "nenhum app encontrado dentro da atualização",
+    "couldn't verify the download (verification tools unavailable)":
+        "não foi possível verificar o download (ferramentas indisponíveis)",
     "the download's code signature is invalid":
         "a assinatura de código do download é inválida",
     "the download isn't notarized / accepted by macOS":
@@ -1004,6 +1014,8 @@ NL: dict[str, str] = {
         "kon het gekoppelde update-volume niet vinden",
     "no application found inside the update":
         "geen app gevonden in de update",
+    "couldn't verify the download (verification tools unavailable)":
+        "kon de download niet verifiëren (verificatietools niet beschikbaar)",
     "the download's code signature is invalid":
         "de codehandtekening van de download is ongeldig",
     "the download isn't notarized / accepted by macOS":
