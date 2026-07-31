@@ -11,7 +11,7 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-VERSION = "0.9.0"  # Swedish, Spanish and German localisation
+VERSION = "0.10.0"  # French, Portuguese and Dutch; CI locale+test checks
 APP_NAME = "Browser Tab Counter"
 BUNDLE_ID = "com.mariolonghi.browsertabcounter"
 WEBSITE = "https://mariolonghi.com"

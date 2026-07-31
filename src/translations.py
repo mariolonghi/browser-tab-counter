@@ -513,4 +513,505 @@ DE: dict[str, str] = {
         "der Download stammt nicht vom erwarteten Entwickler",
 }
 
-CATALOGUES: dict[str, dict[str, str]] = {"sv": SV, "es": ES, "de": DE}
+
+# --------------------------------------------------------------------------
+# French
+# --------------------------------------------------------------------------
+FR: dict[str, str] = {
+    "Counting…": "Comptage…",
+    "No browsers running": "Aucun navigateur ouvert",
+    "{n} tab total": "{n} onglet au total",
+    "{n} tabs total": "{n} onglets au total",
+    "— (permission?)": "— (autorisation ?)",
+    "Refresh now": "Actualiser maintenant",
+    "Export open tabs…": "Exporter les onglets ouverts…",
+    "Alert threshold: off": "Seuil d'alerte : désactivé",
+    "Alert threshold: {n}": "Seuil d'alerte : {n}",
+    "Permissions": "Autorisations",
+    "Re-request browser permissions": "Redemander les autorisations du navigateur",
+    "Open Automation settings…": "Ouvrir les réglages d'Automatisation…",
+    "Launch at Login": "Ouvrir à la connexion",
+    "About {app}": "À propos de {app}",
+    "Quit": "Quitter",
+
+    "Tab history: collecting…": "Historique des onglets : collecte…",
+    "Today": "Aujourd'hui",
+    "avg": "moy.",
+
+    "OK": "OK",
+    "Cancel": "Annuler",
+    "Save": "Enregistrer",
+    "Close": "Fermer",
+    "Later": "Plus tard",
+
+    "Version {version}": "Version {version}",
+    "Installed: {date}": "Installé le {date}",
+    "Polls every {n}s": "Vérifie toutes les {n} s",
+    "Browser permissions (Automation):": "Autorisations des navigateurs (Automatisation) :",
+    "session file (no prompt)": "fichier de session (sans demande)",
+    "granted ✓": "accordée ✓",
+    "needs permission ✗": "autorisation requise ✗",
+    "(no supported browsers running)": "(aucun navigateur compatible ouvert)",
+    "Developer: Mario Longhi — mariolonghi.com":
+        "Développeur : Mario Longhi — mariolonghi.com",
+
+    "Update check unavailable (offline?)":
+        "Impossible de vérifier les mises à jour (hors ligne ?)",
+    "⬆ Update available: v{latest} (you have v{current})":
+        "⬆ Mise à jour disponible : v{latest} (vous avez la v{current})",
+    "✓ You're on the latest version (v{current})":
+        "✓ Vous avez la dernière version (v{current})",
+    "Update now to v{latest}": "Mettre à jour vers la v{latest}",
+    "Release notes": "Notes de version",
+    "Download update": "Télécharger la mise à jour",
+    "Visit mariolonghi.com": "Visiter mariolonghi.com",
+    "Update": "Mise à jour",
+    "Updating to v{latest}…": "Mise à jour vers la v{latest}…",
+    "Downloading and verifying — the app will relaunch itself.":
+        "Téléchargement et vérification — l'app redémarrera toute seule.",
+    "Couldn't update automatically:\n{error}":
+        "Mise à jour automatique impossible :\n{error}",
+    "Update failed:\n{error}": "Échec de la mise à jour :\n{error}",
+    "Open download page": "Ouvrir la page de téléchargement",
+
+    "Couldn't update setting:\n{error}":
+        "Impossible de modifier le réglage :\n{error}",
+
+    "Re-request Browser Permissions": "Redemander les autorisations du navigateur",
+    "Cleared the previous Automation choices.\n\nmacOS will now ask again the "
+    "next time each browser is checked — click Allow on those prompts.\n\nIf "
+    "nothing appears, use “Open Automation settings…” and enable each browser "
+    "under “{app}”.":
+        "Les choix d'Automatisation précédents ont été effacés.\n\nmacOS vous "
+        "redemandera lors de la prochaine vérification de chaque navigateur — "
+        "cliquez sur Autoriser dans ces fenêtres.\n\nSi rien n'apparaît, "
+        "utilisez « Ouvrir les réglages d'Automatisation… » et activez chaque "
+        "navigateur sous « {app} ».",
+    "Couldn't reset the permissions automatically":
+        "Impossible de réinitialiser les autorisations automatiquement",
+    "Open Automation settings and enable each browser under “{app}”.":
+        "Ouvrez les réglages d'Automatisation et activez chaque navigateur sous "
+        "« {app} ».",
+
+    "Alert Threshold": "Seuil d'alerte",
+    "Show ⚠️ and notify once when the total goes above this many tabs.\n"
+    "Enter 0 to turn the alert off.":
+        "Afficher ⚠️ et prévenir une fois que le total dépasse ce nombre "
+        "d'onglets.\nSaisissez 0 pour désactiver l'alerte.",
+    "Please enter a whole number (0 turns the alert off).":
+        "Saisissez un nombre entier (0 désactive l'alerte).",
+    "Over your {n}-tab limit": "Au-delà de votre limite de {n} onglets",
+    "You have {n} tabs open.": "Vous avez {n} onglets ouverts.",
+
+    "Tab History": "Historique des onglets",
+    "Save Tab History": "Enregistrer l'historique des onglets",
+    "No history recorded yet — it starts filling in within a few minutes of "
+    "running.":
+        "Pas encore d'historique — il se remplit après quelques minutes "
+        "d'utilisation.",
+    "Couldn't save the file:\n{error}":
+        "Impossible d'enregistrer le fichier :\n{error}",
+
+    "Export Open Tabs": "Exporter les onglets ouverts",
+    "Couldn't read the open tabs:\n{error}":
+        "Impossible de lire les onglets ouverts :\n{error}",
+    "No open tabs found in the running browsers.":
+        "Aucun onglet ouvert trouvé dans les navigateurs en cours d'exécution.",
+    "Couldn't write the file:\n{error}":
+        "Impossible d'écrire le fichier :\n{error}",
+    "{n} open tab found.\n\nChoose a format:\n\n"
+    "• Spreadsheet (CSV) — open in Numbers, Excel, anything.\n"
+    "• Web page (HTML) — a sortable table with clickable links, viewable in "
+    "any browser.":
+        "{n} onglet ouvert trouvé.\n\nChoisissez un format :\n\n"
+        "• Tableur (CSV) — s'ouvre dans Numbers, Excel ou autre.\n"
+        "• Page web (HTML) — un tableau triable avec des liens cliquables, "
+        "consultable dans n'importe quel navigateur.",
+    "{n} open tabs found.\n\nChoose a format:\n\n"
+    "• Spreadsheet (CSV) — open in Numbers, Excel, anything.\n"
+    "• Web page (HTML) — a sortable table with clickable links, viewable in "
+    "any browser.":
+        "{n} onglets ouverts trouvés.\n\nChoisissez un format :\n\n"
+        "• Tableur (CSV) — s'ouvre dans Numbers, Excel ou autre.\n"
+        "• Page web (HTML) — un tableau triable avec des liens cliquables, "
+        "consultable dans n'importe quel navigateur.",
+    "Spreadsheet (CSV)": "Tableur (CSV)",
+    "Web page (HTML)": "Page web (HTML)",
+    "open tabs": "onglets ouverts",
+    "tab history": "historique des onglets",
+
+    "Open browser tabs": "Onglets ouverts du navigateur",
+    "{n} tab across {browsers} · captured {when} · click a column heading "
+    "to sort":
+        "{n} onglet dans {browsers} · capturé le {when} · cliquez sur un "
+        "en-tête de colonne pour trier",
+    "{n} tabs across {browsers} · captured {when} · click a column heading "
+    "to sort":
+        "{n} onglets dans {browsers} · capturé le {when} · cliquez sur un "
+        "en-tête de colonne pour trier",
+    "no browsers": "aucun navigateur",
+    "browser": "navigateur",
+    "window": "fenêtre",
+    "tab": "onglet",
+    "title": "titre",
+    "url": "url",
+    "active": "actif",
+    "pinned": "épinglé",
+    "loading": "chargement",
+    "window mode": "mode de fenêtre",
+    "last accessed": "dernier accès",
+
+    "running from source": "exécution depuis les sources",
+    "not an .app bundle": "ce n'est pas un paquet .app",
+    "the install location isn't writable":
+        "l'emplacement d'installation n'est pas accessible en écriture",
+    "unexpected update URL, refusing to download":
+        "URL de mise à jour inattendue, téléchargement refusé",
+    "update download is unexpectedly large":
+        "le téléchargement de la mise à jour est anormalement volumineux",
+    "couldn't find the mounted update volume":
+        "impossible de trouver le volume de mise à jour monté",
+    "no application found inside the update":
+        "aucune application trouvée dans la mise à jour",
+    "the download's code signature is invalid":
+        "la signature de code du téléchargement est invalide",
+    "the download isn't notarized / accepted by macOS":
+        "le téléchargement n'est pas notarisé / accepté par macOS",
+    "the download isn't signed by the expected developer":
+        "le téléchargement n'est pas signé par le développeur attendu",
+}
+
+# --------------------------------------------------------------------------
+# Portuguese (Brazilian — matches the wording in pt.lproj)
+# --------------------------------------------------------------------------
+PT: dict[str, str] = {
+    "Counting…": "Contando…",
+    "No browsers running": "Nenhum navegador aberto",
+    "{n} tab total": "{n} aba no total",
+    "{n} tabs total": "{n} abas no total",
+    "— (permission?)": "— (permissão?)",
+    "Refresh now": "Atualizar agora",
+    "Export open tabs…": "Exportar abas abertas…",
+    "Alert threshold: off": "Limite de alerta: desativado",
+    "Alert threshold: {n}": "Limite de alerta: {n}",
+    "Permissions": "Permissões",
+    "Re-request browser permissions": "Solicitar novamente as permissões do navegador",
+    "Open Automation settings…": "Abrir ajustes de Automação…",
+    "Launch at Login": "Abrir ao iniciar sessão",
+    "About {app}": "Sobre o {app}",
+    "Quit": "Sair",
+
+    "Tab history: collecting…": "Histórico de abas: coletando…",
+    "Today": "Hoje",
+    "avg": "méd.",
+
+    "OK": "OK",
+    "Cancel": "Cancelar",
+    "Save": "Salvar",
+    "Close": "Fechar",
+    "Later": "Mais tarde",
+
+    "Version {version}": "Versão {version}",
+    "Installed: {date}": "Instalado em {date}",
+    "Polls every {n}s": "Verifica a cada {n} s",
+    "Browser permissions (Automation):": "Permissões do navegador (Automação):",
+    "session file (no prompt)": "arquivo de sessão (sem permissão)",
+    "granted ✓": "concedida ✓",
+    "needs permission ✗": "precisa de permissão ✗",
+    "(no supported browsers running)": "(nenhum navegador compatível aberto)",
+    "Developer: Mario Longhi — mariolonghi.com":
+        "Desenvolvedor: Mario Longhi — mariolonghi.com",
+
+    "Update check unavailable (offline?)":
+        "Não foi possível verificar atualizações (sem conexão?)",
+    "⬆ Update available: v{latest} (you have v{current})":
+        "⬆ Atualização disponível: v{latest} (você tem a v{current})",
+    "✓ You're on the latest version (v{current})":
+        "✓ Você está na versão mais recente (v{current})",
+    "Update now to v{latest}": "Atualizar agora para a v{latest}",
+    "Release notes": "Notas da versão",
+    "Download update": "Baixar atualização",
+    "Visit mariolonghi.com": "Visitar mariolonghi.com",
+    "Update": "Atualização",
+    "Updating to v{latest}…": "Atualizando para a v{latest}…",
+    "Downloading and verifying — the app will relaunch itself.":
+        "Baixando e verificando — o app vai reiniciar sozinho.",
+    "Couldn't update automatically:\n{error}":
+        "Não foi possível atualizar automaticamente:\n{error}",
+    "Update failed:\n{error}": "A atualização falhou:\n{error}",
+    "Open download page": "Abrir a página de download",
+
+    "Couldn't update setting:\n{error}":
+        "Não foi possível alterar a configuração:\n{error}",
+
+    "Re-request Browser Permissions": "Solicitar novamente as permissões do navegador",
+    "Cleared the previous Automation choices.\n\nmacOS will now ask again the "
+    "next time each browser is checked — click Allow on those prompts.\n\nIf "
+    "nothing appears, use “Open Automation settings…” and enable each browser "
+    "under “{app}”.":
+        "As escolhas anteriores de Automação foram apagadas.\n\nO macOS vai "
+        "perguntar de novo na próxima vez que cada navegador for verificado — "
+        "clique em Permitir nesses avisos.\n\nSe nada aparecer, use “Abrir "
+        "ajustes de Automação…” e ative cada navegador em “{app}”.",
+    "Couldn't reset the permissions automatically":
+        "Não foi possível redefinir as permissões automaticamente",
+    "Open Automation settings and enable each browser under “{app}”.":
+        "Abra os ajustes de Automação e ative cada navegador em “{app}”.",
+
+    "Alert Threshold": "Limite de alerta",
+    "Show ⚠️ and notify once when the total goes above this many tabs.\n"
+    "Enter 0 to turn the alert off.":
+        "Mostrar ⚠️ e avisar uma vez quando o total passar deste número de "
+        "abas.\nDigite 0 para desativar o alerta.",
+    "Please enter a whole number (0 turns the alert off).":
+        "Digite um número inteiro (0 desativa o alerta).",
+    "Over your {n}-tab limit": "Acima do seu limite de {n} abas",
+    "You have {n} tabs open.": "Você tem {n} abas abertas.",
+
+    "Tab History": "Histórico de abas",
+    "Save Tab History": "Salvar o histórico de abas",
+    "No history recorded yet — it starts filling in within a few minutes of "
+    "running.":
+        "Ainda não há histórico — ele começa a ser preenchido após alguns "
+        "minutos de uso.",
+    "Couldn't save the file:\n{error}":
+        "Não foi possível salvar o arquivo:\n{error}",
+
+    "Export Open Tabs": "Exportar abas abertas",
+    "Couldn't read the open tabs:\n{error}":
+        "Não foi possível ler as abas abertas:\n{error}",
+    "No open tabs found in the running browsers.":
+        "Nenhuma aba aberta encontrada nos navegadores em execução.",
+    "Couldn't write the file:\n{error}":
+        "Não foi possível gravar o arquivo:\n{error}",
+    "{n} open tab found.\n\nChoose a format:\n\n"
+    "• Spreadsheet (CSV) — open in Numbers, Excel, anything.\n"
+    "• Web page (HTML) — a sortable table with clickable links, viewable in "
+    "any browser.":
+        "{n} aba aberta encontrada.\n\nEscolha um formato:\n\n"
+        "• Planilha (CSV) — abre no Numbers, Excel e afins.\n"
+        "• Página web (HTML) — uma tabela ordenável com links clicáveis, que "
+        "pode ser vista em qualquer navegador.",
+    "{n} open tabs found.\n\nChoose a format:\n\n"
+    "• Spreadsheet (CSV) — open in Numbers, Excel, anything.\n"
+    "• Web page (HTML) — a sortable table with clickable links, viewable in "
+    "any browser.":
+        "{n} abas abertas encontradas.\n\nEscolha um formato:\n\n"
+        "• Planilha (CSV) — abre no Numbers, Excel e afins.\n"
+        "• Página web (HTML) — uma tabela ordenável com links clicáveis, que "
+        "pode ser vista em qualquer navegador.",
+    "Spreadsheet (CSV)": "Planilha (CSV)",
+    "Web page (HTML)": "Página web (HTML)",
+    "open tabs": "abas abertas",
+    "tab history": "histórico de abas",
+
+    "Open browser tabs": "Abas abertas do navegador",
+    "{n} tab across {browsers} · captured {when} · click a column heading "
+    "to sort":
+        "{n} aba em {browsers} · capturado em {when} · clique no cabeçalho de "
+        "uma coluna para ordenar",
+    "{n} tabs across {browsers} · captured {when} · click a column heading "
+    "to sort":
+        "{n} abas em {browsers} · capturado em {when} · clique no cabeçalho de "
+        "uma coluna para ordenar",
+    "no browsers": "nenhum navegador",
+    "browser": "navegador",
+    "window": "janela",
+    "tab": "aba",
+    "title": "título",
+    "url": "url",
+    "active": "ativa",
+    "pinned": "fixada",
+    "loading": "carregando",
+    "window mode": "modo da janela",
+    "last accessed": "último acesso",
+
+    "running from source": "executando a partir do código-fonte",
+    "not an .app bundle": "não é um pacote .app",
+    "the install location isn't writable":
+        "o local de instalação não permite gravação",
+    "unexpected update URL, refusing to download":
+        "URL de atualização inesperada, download recusado",
+    "update download is unexpectedly large":
+        "o download da atualização está grande demais",
+    "couldn't find the mounted update volume":
+        "não foi possível encontrar o volume de atualização montado",
+    "no application found inside the update":
+        "nenhum app encontrado dentro da atualização",
+    "the download's code signature is invalid":
+        "a assinatura de código do download é inválida",
+    "the download isn't notarized / accepted by macOS":
+        "o download não está notarizado / aceito pelo macOS",
+    "the download isn't signed by the expected developer":
+        "o download não está assinado pelo desenvolvedor esperado",
+}
+
+# --------------------------------------------------------------------------
+# Dutch
+# --------------------------------------------------------------------------
+NL: dict[str, str] = {
+    "Counting…": "Tellen…",
+    "No browsers running": "Geen browsers geopend",
+    "{n} tab total": "{n} tabblad in totaal",
+    "{n} tabs total": "{n} tabbladen in totaal",
+    "— (permission?)": "— (toegang?)",
+    "Refresh now": "Nu vernieuwen",
+    "Export open tabs…": "Open tabbladen exporteren…",
+    "Alert threshold: off": "Waarschuwingsgrens: uit",
+    "Alert threshold: {n}": "Waarschuwingsgrens: {n}",
+    "Permissions": "Toegang",
+    "Re-request browser permissions": "Browsertoegang opnieuw aanvragen",
+    "Open Automation settings…": "Automatisering-instellingen openen…",
+    "Launch at Login": "Openen bij inloggen",
+    "About {app}": "Over {app}",
+    "Quit": "Stop",
+
+    "Tab history: collecting…": "Tabbladgeschiedenis: verzamelen…",
+    "Today": "Vandaag",
+    "avg": "gem.",
+
+    "OK": "OK",
+    "Cancel": "Annuleer",
+    "Save": "Bewaar",
+    "Close": "Sluit",
+    "Later": "Later",
+
+    "Version {version}": "Versie {version}",
+    "Installed: {date}": "Geïnstalleerd op {date}",
+    "Polls every {n}s": "Controleert elke {n} s",
+    "Browser permissions (Automation):": "Browsertoegang (Automatisering):",
+    "session file (no prompt)": "sessiebestand (geen vraag)",
+    "granted ✓": "verleend ✓",
+    "needs permission ✗": "toegang vereist ✗",
+    "(no supported browsers running)": "(geen ondersteunde browsers geopend)",
+    "Developer: Mario Longhi — mariolonghi.com":
+        "Ontwikkelaar: Mario Longhi — mariolonghi.com",
+
+    "Update check unavailable (offline?)":
+        "Kan niet op updates controleren (offline?)",
+    "⬆ Update available: v{latest} (you have v{current})":
+        "⬆ Update beschikbaar: v{latest} (je hebt v{current})",
+    "✓ You're on the latest version (v{current})":
+        "✓ Je hebt de nieuwste versie (v{current})",
+    "Update now to v{latest}": "Nu bijwerken naar v{latest}",
+    "Release notes": "Versie-informatie",
+    "Download update": "Update downloaden",
+    "Visit mariolonghi.com": "Ga naar mariolonghi.com",
+    "Update": "Update",
+    "Updating to v{latest}…": "Bijwerken naar v{latest}…",
+    "Downloading and verifying — the app will relaunch itself.":
+        "Downloaden en verifiëren — de app start zichzelf opnieuw.",
+    "Couldn't update automatically:\n{error}":
+        "Automatisch bijwerken is mislukt:\n{error}",
+    "Update failed:\n{error}": "Bijwerken mislukt:\n{error}",
+    "Open download page": "Downloadpagina openen",
+
+    "Couldn't update setting:\n{error}":
+        "Kon de instelling niet wijzigen:\n{error}",
+
+    "Re-request Browser Permissions": "Browsertoegang opnieuw aanvragen",
+    "Cleared the previous Automation choices.\n\nmacOS will now ask again the "
+    "next time each browser is checked — click Allow on those prompts.\n\nIf "
+    "nothing appears, use “Open Automation settings…” and enable each browser "
+    "under “{app}”.":
+        "De eerdere Automatisering-keuzes zijn gewist.\n\nmacOS vraagt het "
+        "opnieuw zodra elke browser weer wordt gecontroleerd — klik daar op "
+        "Sta toe.\n\nAls er niets verschijnt, gebruik "
+        "“Automatisering-instellingen openen…” en zet elke browser aan onder "
+        "“{app}”.",
+    "Couldn't reset the permissions automatically":
+        "Kon de toegang niet automatisch herstellen",
+    "Open Automation settings and enable each browser under “{app}”.":
+        "Open de Automatisering-instellingen en zet elke browser aan onder "
+        "“{app}”.",
+
+    "Alert Threshold": "Waarschuwingsgrens",
+    "Show ⚠️ and notify once when the total goes above this many tabs.\n"
+    "Enter 0 to turn the alert off.":
+        "Toon ⚠️ en waarschuw één keer zodra het totaal boven dit aantal "
+        "tabbladen komt.\nVoer 0 in om de waarschuwing uit te zetten.",
+    "Please enter a whole number (0 turns the alert off).":
+        "Voer een heel getal in (0 zet de waarschuwing uit).",
+    "Over your {n}-tab limit": "Boven je grens van {n} tabbladen",
+    "You have {n} tabs open.": "Je hebt {n} tabbladen open.",
+
+    "Tab History": "Tabbladgeschiedenis",
+    "Save Tab History": "Tabbladgeschiedenis bewaren",
+    "No history recorded yet — it starts filling in within a few minutes of "
+    "running.":
+        "Nog geen geschiedenis — die vult zich na een paar minuten vanzelf.",
+    "Couldn't save the file:\n{error}":
+        "Kon het bestand niet bewaren:\n{error}",
+
+    "Export Open Tabs": "Open tabbladen exporteren",
+    "Couldn't read the open tabs:\n{error}":
+        "Kon de open tabbladen niet lezen:\n{error}",
+    "No open tabs found in the running browsers.":
+        "Geen open tabbladen gevonden in de geopende browsers.",
+    "Couldn't write the file:\n{error}":
+        "Kon het bestand niet schrijven:\n{error}",
+    "{n} open tab found.\n\nChoose a format:\n\n"
+    "• Spreadsheet (CSV) — open in Numbers, Excel, anything.\n"
+    "• Web page (HTML) — a sortable table with clickable links, viewable in "
+    "any browser.":
+        "{n} open tabblad gevonden.\n\nKies een formaat:\n\n"
+        "• Spreadsheet (CSV) — opent in Numbers, Excel en zo meer.\n"
+        "• Webpagina (HTML) — een sorteerbare tabel met klikbare links, in "
+        "elke browser te bekijken.",
+    "{n} open tabs found.\n\nChoose a format:\n\n"
+    "• Spreadsheet (CSV) — open in Numbers, Excel, anything.\n"
+    "• Web page (HTML) — a sortable table with clickable links, viewable in "
+    "any browser.":
+        "{n} open tabbladen gevonden.\n\nKies een formaat:\n\n"
+        "• Spreadsheet (CSV) — opent in Numbers, Excel en zo meer.\n"
+        "• Webpagina (HTML) — een sorteerbare tabel met klikbare links, in "
+        "elke browser te bekijken.",
+    "Spreadsheet (CSV)": "Spreadsheet (CSV)",
+    "Web page (HTML)": "Webpagina (HTML)",
+    "open tabs": "open tabbladen",
+    "tab history": "tabbladgeschiedenis",
+
+    "Open browser tabs": "Open browsertabbladen",
+    "{n} tab across {browsers} · captured {when} · click a column heading "
+    "to sort":
+        "{n} tabblad in {browsers} · vastgelegd op {when} · klik op een "
+        "kolomkop om te sorteren",
+    "{n} tabs across {browsers} · captured {when} · click a column heading "
+    "to sort":
+        "{n} tabbladen in {browsers} · vastgelegd op {when} · klik op een "
+        "kolomkop om te sorteren",
+    "no browsers": "geen browsers",
+    "browser": "browser",
+    "window": "venster",
+    "tab": "tabblad",
+    "title": "titel",
+    "url": "url",
+    "active": "actief",
+    "pinned": "vastgezet",
+    "loading": "laden",
+    "window mode": "venstermodus",
+    "last accessed": "laatst gebruikt",
+
+    "running from source": "draait vanuit de broncode",
+    "not an .app bundle": "geen .app-pakket",
+    "the install location isn't writable":
+        "de installatielocatie is niet beschrijfbaar",
+    "unexpected update URL, refusing to download":
+        "onverwachte update-URL, download geweigerd",
+    "update download is unexpectedly large":
+        "de update-download is onverwacht groot",
+    "couldn't find the mounted update volume":
+        "kon het gekoppelde update-volume niet vinden",
+    "no application found inside the update":
+        "geen app gevonden in de update",
+    "the download's code signature is invalid":
+        "de codehandtekening van de download is ongeldig",
+    "the download isn't notarized / accepted by macOS":
+        "de download is niet genotariseerd / geaccepteerd door macOS",
+    "the download isn't signed by the expected developer":
+        "de download is niet ondertekend door de verwachte ontwikkelaar",
+}
+
+CATALOGUES: dict[str, dict[str, str]] = {
+    "sv": SV, "es": ES, "de": DE, "fr": FR, "pt": PT, "nl": NL,
+}

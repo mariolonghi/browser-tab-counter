@@ -1,0 +1,2 @@
+/* Exibido pelo macOS no aviso de permissão de Automação. */
+"NSAppleEventsUsageDescription" = "Browser Tab Counter lê quantas abas estão abertas nos seus navegadores para poder mostrar o total na barra de menus.";

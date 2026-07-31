@@ -1,0 +1,2 @@
+/* Affiché par macOS dans la demande d'autorisation d'automatisation. */
+"NSAppleEventsUsageDescription" = "Browser Tab Counter lit le nombre d'onglets ouverts dans vos navigateurs afin d'afficher le total dans la barre des menus.";

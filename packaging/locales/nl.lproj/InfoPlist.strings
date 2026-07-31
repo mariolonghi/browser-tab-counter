@@ -1,0 +1,2 @@
+/* Wordt door macOS getoond in de toestemmingsvraag voor Automatisering. */
+"NSAppleEventsUsageDescription" = "Browser Tab Counter leest hoeveel tabbladen er open staan in je browsers om het totaal in de menubalk te tonen.";

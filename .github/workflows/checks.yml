@@ -1,0 +1,48 @@
+name: checks
+
+# Fast correctness gate on every push/PR that touches the app:
+#
+#  * locale parity — a language must exist in all three places that matter
+#    (packaging/locales/*.lproj, CFBundleLocalizations in setup.py, and the UI
+#    catalogues in src/translations.py). See packaging/check_locales.py.
+#  * the test suite — Firefox counting, tab export, self-update, i18n.
+#
+# Both are stdlib-only, so this needs no dependency install and runs in seconds.
+# The heavyweight signed/notarized build stays in release.yml (tag pushes only).
+on:
+  push:
+    paths:
+      - ".github/workflows/checks.yml"
+      - "src/**"
+      - "tests/**"
+      - "packaging/**"
+  pull_request:
+    paths:
+      - ".github/workflows/checks.yml"
+      - "src/**"
+      - "tests/**"
+      - "packaging/**"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest   # ubuntu-24.04 ships Python 3.12; no setup step needed
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Locale parity
+        run: python3 packaging/check_locales.py
+
+      - name: Test suite
+        run: |
+          set -euo pipefail
+          for t in tests/test_*.py; do
+            echo "--- $t"
+            python3 "$t"
+          done

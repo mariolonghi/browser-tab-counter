@@ -43,7 +43,7 @@ OPTIONS = {
         # English-only and won't offer it in System Settings › General ›
         # Language & Region › Applications (the per-app language override).
         "CFBundleDevelopmentRegion": "en",
-        "CFBundleLocalizations": ["en", "sv", "es", "de"],
+        "CFBundleLocalizations": ["en", "sv", "es", "de", "fr", "pt", "nl"],
         # Run the frozen interpreter in UTF-8 mode. Launched from Finder an app
         # inherits a C/POSIX locale, so without this, subprocess text output and
         # file I/O would default to ASCII and crash on non-ASCII (em dashes,
