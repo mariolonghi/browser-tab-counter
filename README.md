@@ -9,7 +9,7 @@ per-browser breakdown. No admin rights, no browser extension, no account.
 
 ---
 
-## 🚀 Install (about 2 minutes)
+## 🚀 Install (60 secs)
 
 1. **[Download the latest version](https://github.com/mariolonghi/browser-tab-counter/releases/latest)** — grab the `BrowserTabCounter-x.y.z.dmg` file.
 2. **Open it**, then **drag** the app onto the **Applications** folder in the window.
@@ -25,9 +25,7 @@ That's all you need to get going. Everything below is optional detail.
 
 ---
 
-<details>
-<summary><strong>👀 What it looks like</strong></summary>
-
+## 👀 What it looks like
 ```
 menu bar:  … ⧉ 8  🔋  🔎  Wed 16:32     (⧉ ⚠️ 8 when over your alert threshold)
               └─ click ─┐
@@ -52,8 +50,7 @@ menu bar:  … ⧉ 8  🔋  🔎  Wed 16:32     (⧉ ⚠️ 8 when over your ale
               └────────────────────────────────────┘
 ```
 
-</details>
-
+## Key info
 <details>
 <summary><strong>🔐 Fixing the permission pop-ups</strong></summary>
 
@@ -174,6 +171,7 @@ never launched just to count it.
 
 </details>
 
+## Techinical stuff
 <details>
 <summary><strong>🛠️ Build from source & project layout</strong></summary>
 
@@ -272,17 +270,14 @@ real-time. Making Firefox real-time too would require the macOS Accessibility AP
 
 </details>
 
-<details>
-<summary><strong>🙏 Shoutout</strong></summary>
+## 🙏 Shoutout
 
 This project is a hyper-simplified use case around tab usage. There are much more
 complete tab-managers available in the market. Special shout-out to
-[auspy](https://github.com/auspy) who maintains the **SupaSidebar** tool.
+[auspy](https://github.com/auspy) who maintains the SupaSidebar tool.
 
-</details>
 
-<details>
-<summary><strong>🔒 Disclaimer</strong></summary>
+## 🔒 Disclaimer
 
 - **Privacy.** Once installed, this app does not send any information to the
   internet. No cloud linkage, no account, no telemetry. Your settings and the
@@ -292,7 +287,6 @@ complete tab-managers available in the market. Special shout-out to
   read-only request to GitHub, no personal data.)*
 - **Support.** The app is provided free to use, with limited support.
 
-</details>
 
 ---
 
