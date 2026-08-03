@@ -7,6 +7,27 @@ A tiny **macOS menu-bar app** that answers one question at a glance:
 It shows a single number near the clock (e.g. `⧉ 147`). Click it for a
 per-browser breakdown. No admin rights, no browser extension, no account.
 
+---
+
+## 🚀 Install (about 2 minutes)
+
+1. **[Download the latest version](https://github.com/mariolonghi/browser-tab-counter/releases/latest)** — grab the `BrowserTabCounter-x.y.z.dmg` file.
+2. **Open it**, then **drag** the app onto the **Applications** folder in the window.
+3. **Double-click** the app in Applications to start it.
+4. A **`⧉` number appears in your menu bar** — that's it, there's no window to keep open.
+
+**First time you run it,** macOS asks permission to read each browser
+(*"…wants access to control Safari"*). Just click **OK** on each one — it's a
+normal per-user permission, no admin needed, and the app only ever *counts* tabs,
+never reads what's in them. (Firefox needs no pop-up.)
+
+That's all you need to get going. Everything below is optional detail.
+
+---
+
+<details>
+<summary><strong>👀 What it looks like</strong></summary>
+
 ```
 menu bar:  … ⧉ 8  🔋  🔎  Wed 16:32     (⧉ ⚠️ 8 when over your alert threshold)
               └─ click ─┐
@@ -31,98 +52,96 @@ menu bar:  … ⧉ 8  🔋  🔎  Wed 16:32     (⧉ ⚠️ 8 when over your ale
               └────────────────────────────────────┘
 ```
 
----
+</details>
 
-## 🚀 Quick start (install & run)
+<details>
+<summary><strong>🔐 Fixing the permission pop-ups</strong></summary>
 
-1. **Download** the latest `BrowserTabCounter-x.y.z.dmg` from the
-   [**Releases**](https://github.com/mariolonghi/browser-tab-counter/releases/latest) page.
-2. **Open the `.dmg`** and **drag** *Browser Tab Counter* onto the **Applications**
-   folder shown in the window.
-3. **Double-click** *Browser Tab Counter* in **Applications** to launch it. The
-   app is Apple-notarized (v0.3.1+), so it just opens — no Gatekeeper warning.
-   *(Very old builds ≤ v0.3.0 were unsigned; if you're on one of those, either
-   grab the latest release or right-click → Open once.)*
-4. A **`⧉` number appears in your menu bar.** That's it — there's no window.
-
-### 🔐 Grant the permission pop-ups (no admin needed)
-
-The first time the app reads each browser, macOS shows an **Automation** pop-up:
-
-> *"Browser Tab Counter" wants access to control "Safari".*
-
-👉 **Click `OK`** on each one. You'll see one per browser you use (Safari, Chrome,
-Edge, …). This is a normal per-user permission — **not** an administrator action,
-and the app only ever *counts* tabs, it never reads their content.
+The first time the app reads each browser, macOS shows an **Automation** pop-up
+asking to control that browser. Click **OK** — you'll see one per browser you use
+(Safari, Chrome, Edge, …). It's a normal per-user permission, **not** an admin
+action, and the app only *counts* tabs.
 
 - **Clicked *Don't Allow* or missed a prompt?** Use the menu →
-  **Permissions → Re-request browser permissions**. It clears the previous
-  decision (via `tccutil`) and asks again. There's also
-  **Permissions → Open Automation settings…** to jump straight to
-  *System Settings → Privacy & Security → Automation → Browser Tab Counter*.
-- A browser showing `— (permission?)` in the dropdown just means its Automation
-  permission is still off.
+  **Permissions → Re-request browser permissions**. It clears the previous choice
+  and asks again. There's also **Permissions → Open Automation settings…** to jump
+  straight to *System Settings → Privacy & Security → Automation*.
+- A browser showing `— (permission?)` in the dropdown just means its permission is
+  still off.
 - **Firefox needs no pop-up** — it's counted by reading its own session file.
 
-### ℹ️ About / troubleshoot
+</details>
 
-The menu → **About Browser Tab Counter** shows version, install date, poll
-interval, and each running browser's current permission status — handy when
-something isn't counting. It also links to the developer site, mariolonghi.com.
+<details>
+<summary><strong>ℹ️ About panel & automatic updates</strong></summary>
 
-**Update check & one-click self-update 🆕.** Opening About checks GitHub Releases
-and tells you whether you're on the latest version. If a newer one exists, click
-**Update now** and the app updates *itself* — it downloads the new release,
-**verifies it's notarized and signed by the same developer** (a tampered or fake
-"update" can't install), swaps the app in place, and relaunches. No admin, no
-manual drag-to-Applications. (Running from source or a read-only location? It
-falls back to a **Download update** button that opens the release page instead.)
-The check runs only when you open About — a plain read-only request to GitHub, no
-personal data sent, and it fails quietly offline.
+The menu → **About Browser Tab Counter** shows the version, install date, poll
+interval, and each running browser's permission status — handy when something
+isn't counting. It also links to mariolonghi.com.
 
-### ⚠️ Alert threshold (optional)
+**Update check & one-click self-update.** Opening About checks GitHub and tells
+you whether you're on the latest version. If a newer one exists, click **Update
+now** and the app updates *itself* — it downloads the new release, **verifies it's
+notarized and signed by the same developer** (a fake "update" can't install),
+swaps itself in place, and relaunches. No admin, no manual dragging. (Running from
+source or a read-only location? It falls back to a **Download update** button.)
+The check runs only when you open About, sends no personal data, and fails quietly
+when offline.
+
+</details>
+
+<details>
+<summary><strong>⚠️ Alert threshold</strong></summary>
 
 Menu → **Alert threshold** lets you pick a number. When your total goes **above**
-it, the menu-bar indicator adds a **`⚠️`** (so it reads `⧉ ⚠️ N`) and you get a
-single notification (it re-arms once the count drops back below). Enter **0** to
-turn it off. Your choice is saved locally.
+it, the indicator adds a **`⚠️`** (so it reads `⧉ ⚠️ N`) and you get a single
+notification (it re-arms once the count drops back below). Enter **0** to turn it
+off. Your choice is saved locally.
 
-### 📈 Tabs over time
+</details>
+
+<details>
+<summary><strong>📈 Tabs over time</strong></summary>
 
 The dropdown shows a tiny **sparkline** of today's total with **min · avg · max**.
 The app samples the total every few minutes into a small, capped local file
 (≈ a week of history, a few KB — **counts only, never tab content**).
-**Click the sparkline** to save a copy of that history as a CSV wherever you
-like 🆕.
+**Click the sparkline** to save a copy of that history as a CSV.
 
-### 📄 Export open tabs
+</details>
+
+<details>
+<summary><strong>📄 Export open tabs</strong></summary>
 
 Menu → **Export open tabs…** takes a snapshot of every tab open *right now* and
-saves it wherever you choose. It asks which format you'd like 🆕:
+saves it wherever you choose, in your pick of format:
 
 - **Spreadsheet (CSV)** — open it in Numbers, Excel, or anything else.
-- **Web page (HTML)** 🆕 — a self-contained page you can just double-click: the
-  same data as a table, with **clickable links** and **sortable columns** (click
-  a heading to sort, click again to reverse). It works offline and loads nothing
-  from the internet; the only script in it is the column sorting.
+- **Web page (HTML)** — a self-contained page you can double-click: the same data
+  as a table, with **clickable links** and **sortable columns**. It works offline
+  and loads nothing from the internet.
 
-Either way each row captures as much as the browser exposes: `browser, window,
-tab, active, pinned, loading, window_mode, last_accessed, title, url`, and the
-file ends with a short note saying which version of the app generated it.
+Each row captures as much as the browser exposes: `browser, window, tab, active,
+pinned, loading, window_mode, last_accessed, title, url`, and the file ends with a
+note saying which app version generated it.
 
 This is the one action that reads tab **titles and URLs** — so it's **on demand
-only** (nothing is gathered until you click it), **read-only**, and **local**
-(the file goes only where you save it; nothing is kept or sent).
+only**, **read-only**, and **local** (nothing is kept or sent).
 Private/incognito windows aren't included (browsers don't expose them).
 
-### ⭐ Launch at login
+</details>
 
-**On by default** — a new install turns itself on to start each time you log in
-(it's a menu-bar utility, after all). Don't want that? Menu → **Launch at Login**
-to toggle it off (the checkmark disappears), and it stays off. No admin required —
-it uses a per-user LaunchAgent.
+<details>
+<summary><strong>⭐ Launch at login</strong></summary>
 
-### 🌍 Languages 🆕
+**On by default** — a new install starts itself each time you log in (it's a
+menu-bar utility, after all). Don't want that? Menu → **Launch at Login** to
+toggle it off. No admin required — it uses a per-user LaunchAgent.
+
+</details>
+
+<details>
+<summary><strong>🌍 Languages</strong></summary>
 
 The app speaks **English, Swedish, Spanish, German, French, Portuguese and
 Dutch**, and picks whichever your Mac prefers — no setting to find. Menus,
@@ -132,20 +151,17 @@ all translated, and dates follow your language too.
 Want a different one just for this app? **System Settings → General → Language
 & Region → Applications → +**, pick *Browser Tab Counter* and a language.
 
-### Quit
+</details>
+
+<details>
+<summary><strong>👋 Quitting</strong></summary>
 
 Click the `⧉` menu → **Quit**.
 
----
+</details>
 
-## Shoutout
-
-This project is a hyper simplified use case around tab usage.
-There are much more complete tab-manager available in the market. Special shout-out to [auspy](https://github.com/auspy) who maintains the **SupaSidebar** tool.
-
----
-
-## Which browsers are counted
+<details>
+<summary><strong>🌐 Which browsers are counted</strong></summary>
 
 | Family | Browsers | How |
 |--------|----------|-----|
@@ -156,11 +172,10 @@ There are much more complete tab-manager available in the market. Special shout-
 Only **running** browsers are counted; a closed browser contributes 0 and is
 never launched just to count it.
 
----
+</details>
 
-## The technical stuff
-
-### Build from source
+<details>
+<summary><strong>🛠️ Build from source & project layout</strong></summary>
 
 Requirements: macOS, Python **3.9+** (system `/usr/bin/python3` 3.8 is too old
 for PyObjC/rumps — use Homebrew's `python3.13`).
@@ -196,7 +211,7 @@ Build the distributable `.dmg`:
 notarize + staple the result), otherwise it falls back to an ad-hoc signature.
 **If you need info on signing and notarizing, reach out.**
 
-### Project layout
+**Project layout**
 
 ```
 src/          the app
@@ -229,41 +244,57 @@ tests/        regression tests
 | `tests/test_i18n.py` | Translation coverage, placeholders, plurals, English fallback |
 | `requirements.txt` | Runtime deps (`rumps`, `certifi`) |
 
----
+</details>
 
-## Notes & limitations
+<details>
+<summary><strong>📌 Notes & limitations</strong></summary>
 
 **How Firefox counting works & its caveats.** Firefox has no tab-scripting API,
 so tabs are counted by reading its `sessionstore` files (windows × tabs, summed).
-That's accurate for normal multi-window use and now sums across **multiple open
+That's accurate for normal multi-window use and sums across **multiple open
 profiles**, but two limits are inherent to the approach:
 
 - **~15 s lag.** Firefox only rewrites its session file on a timer (and pauses
-  when idle), so a tab you just opened/closed takes a few seconds to show up. The
-  count is right once Firefox next saves.
+  when idle), so a tab you just opened/closed takes a few seconds to show up.
 - **Private windows aren't counted.** Firefox deliberately never writes private
   browsing windows to disk, so their tabs are invisible to any external counter.
-- Session restore must be enabled (the default). If a profile is set to never
-  save history/session, its tabs can't be read.
+- Session restore must be enabled (the default). If a profile is set to never save
+  history/session, its tabs can't be read.
 
 Chromium/Safari counts (via AppleScript) don't have these caveats — they're
-real-time. If you need Firefox to be real-time too, that requires the macOS
-Accessibility API (an extra permission + fragile UI parsing) — not currently done.
+real-time. Making Firefox real-time too would require the macOS Accessibility API
+(an extra permission + fragile UI parsing) — not currently done.
+
 - **No Mac App Store build.** The App Store requires sandboxing, which blocks
   reading Firefox's session file (and realistically needs a native Swift rewrite).
-  This project targets **drag-to-install** only. Design rationale lives in the
-  dossier under `~/Documents/MLonghi/Project-1/Browser Tab Counter/distribution.md`.
+  This project targets **drag-to-install** only.
 - The design dossier (the "why") is kept separately from this code repo.
 
-## Disclaimer
+</details>
 
-- **Privacy.** Once installed on your system, this app does not send any
-  information to the internet. No cloud linkage, no account needed, no telemetry.
-  Your settings and the tab-history log stay on your Mac in
-  `~/Library/Application Support/BrowserTabCounter/`.
-  *(The only network use is the optional update check, which runs only when you
-  open the About window — a read-only request to GitHub, no personal data.)*
+<details>
+<summary><strong>🙏 Shoutout</strong></summary>
+
+This project is a hyper-simplified use case around tab usage. There are much more
+complete tab-managers available in the market. Special shout-out to
+[auspy](https://github.com/auspy) who maintains the **SupaSidebar** tool.
+
+</details>
+
+<details>
+<summary><strong>🔒 Disclaimer</strong></summary>
+
+- **Privacy.** Once installed, this app does not send any information to the
+  internet. No cloud linkage, no account, no telemetry. Your settings and the
+  tab-history log stay on your Mac in
+  `~/Library/Application Support/BrowserTabCounter/`. *(The only network use is the
+  optional update check, which runs only when you open the About window — a
+  read-only request to GitHub, no personal data.)*
 - **Support.** The app is provided free to use, with limited support.
+
+</details>
+
+---
 
 ## License
 
