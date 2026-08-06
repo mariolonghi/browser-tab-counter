@@ -286,7 +286,10 @@ complete tab-managers available in the market. Special shout-out to
   optional update check, which runs only when you open the About window — a
   read-only request to GitHub, no personal data.)*
 - **Support.** The app is provided free to use, with limited support.
-
+- **Found a security problem?** Please report it **privately** via
+  [**Report a vulnerability**](https://github.com/mariolonghi/browser-tab-counter/security/advisories/new)
+  (repo → Security tab), not a public issue. See [SECURITY.md](SECURITY.md) for
+  scope and what to expect.
 
 ---
 
