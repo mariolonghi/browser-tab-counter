@@ -122,10 +122,37 @@ def test_csv_footer_disclaimer_does_not_corrupt_the_data():
         assert token in note                                # app info present
 
 
+def test_a_failed_read_raises_instead_of_looking_empty():
+    """Regression for issue #1: a timeout used to return [], which the UI then
+    reported as "no open tabs" — silent data loss. It must raise instead."""
+    import types
+    orig = tabexport.tabcount._osascript
+    try:
+        tabexport.tabcount._osascript = lambda script, timeout=5: (False, "timeout")
+        browser = types.SimpleNamespace(name="Microsoft Edge", method="chromium")
+        for gather in (tabexport._chromium_gather, tabexport._safari_gather):
+            try:
+                gather(browser)
+                raise AssertionError(f"{gather.__name__} silently returned on failure")
+            except tabexport.ExportError:
+                pass
+    finally:
+        tabexport.tabcount._osascript = orig
+
+
+def test_applescript_booleans_become_yes_no():
+    """The bulk query returns true/false; the CSV column uses yes/no."""
+    assert tabexport._yesno("true") == "yes"
+    assert tabexport._yesno("false") == "no"
+    assert tabexport._yesno("") == ""
+
+
 if __name__ == "__main__":
     test_csv_roundtrip_has_all_columns()
     test_firefox_gather_pulls_extras()
     test_html_export_escapes_and_links_safely()
     test_html_has_same_columns_as_csv()
     test_csv_footer_disclaimer_does_not_corrupt_the_data()
+    test_a_failed_read_raises_instead_of_looking_empty()
+    test_applescript_booleans_become_yes_no()
     print("all tab-export tests passed")

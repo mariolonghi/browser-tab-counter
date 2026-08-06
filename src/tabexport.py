@@ -29,6 +29,17 @@ from i18n import _, format_datetime, ngettext
 _FS = "\x1f"
 _RS = "\x1e"
 
+
+class ExportError(Exception):
+    """A browser could not be read. Raised rather than returning an empty
+    list, so a timeout is never silently presented as "you have no tabs".
+    """
+
+
+# Reading every tab is bulk-fetched now, so even thousands of tabs finish in
+# about a second. The generous ceiling is a safety net, not the normal path.
+GATHER_TIMEOUT = 60
+
 # CSV column order.
 FIELDS = [
     "browser", "window", "tab", "active", "pinned", "loading",
@@ -54,11 +65,16 @@ class Tab:
 # AppleScript gather (Safari + Chromium)
 # --------------------------------------------------------------------------
 
+# Ask for each property of *every* tab in one go. Reading `title of t` per tab
+# costs one Apple Event round-trip each, so a browser with hundreds of tabs took
+# tens of seconds (measured: 53 ms/tab, ~11 s for 213 tabs). Bulk access is one
+# round-trip per property per window, which is ~27x faster and scales with the
+# number of windows rather than tabs. See issue #1.
 _CHROMIUM_SCRIPT = (
     "set FS to (character id 31)\n"
     "set RS to (character id 30)\n"
+    "set acc to {{}}\n"
     'tell application "{app}"\n'
-    '  set outp to ""\n'
     "  set wi to 0\n"
     "  repeat with w in windows\n"
     "    set wi to wi + 1\n"
@@ -67,26 +83,34 @@ _CHROMIUM_SCRIPT = (
     "    try\n"
     "      set wmode to (mode of w)\n"
     "    end try\n"
-    "    set ti to 0\n"
-    "    repeat with t in tabs of w\n"
-    "      set ti to ti + 1\n"
-    '      set ld to "no"\n'
+    "    set tt to title of every tab of w\n"
+    "    set uu to URL of every tab of w\n"
+    "    set ll to {{}}\n"
+    "    try\n"
+    "      set ll to loading of every tab of w\n"
+    "    end try\n"
+    "    repeat with k from 1 to (count of tt)\n"
+    '      set ld to ""\n'
     "      try\n"
-    '        if (loading of t) then set ld to "yes"\n'
+    "        set ld to (item k of ll) as text\n"
     "      end try\n"
-    "      set outp to outp & wi & FS & ti & FS & atc & FS & wmode & FS & ld "
-    "& FS & (title of t) & FS & (URL of t) & RS\n"
+    "      set end of acc to ((wi as text) & FS & (k as text) & FS & "
+    "(atc as text) & FS & wmode & FS & ld & FS & (item k of tt) & FS & "
+    "(item k of uu))\n"
     "    end repeat\n"
     "  end repeat\n"
-    "  return outp\n"
-    "end tell"
+    "end tell\n"
+    "set AppleScript's text item delimiters to RS\n"
+    "set outp to acc as text\n"
+    'set AppleScript\'s text item delimiters to ""\n'
+    "return outp"
 )
 
 _SAFARI_SCRIPT = (
     "set FS to (character id 31)\n"
     "set RS to (character id 30)\n"
+    "set acc to {}\n"
     'tell application "Safari"\n'
-    '  set outp to ""\n'
     "  set wi to 0\n"
     "  repeat with w in windows\n"
     "    set wi to wi + 1\n"
@@ -94,18 +118,27 @@ _SAFARI_SCRIPT = (
     "    try\n"
     "      set cti to (index of current tab of w)\n"
     "    end try\n"
-    "    set ti to 0\n"
     "    try\n"
-    "      repeat with t in tabs of w\n"
-    "        set ti to ti + 1\n"
-    "        set outp to outp & wi & FS & ti & FS & cti & FS & (name of t) "
-    "& FS & (URL of t) & RS\n"
+    "      set tt to name of every tab of w\n"
+    "      set uu to URL of every tab of w\n"
+    "      repeat with k from 1 to (count of tt)\n"
+    "        set end of acc to ((wi as text) & FS & (k as text) & FS & "
+    "(cti as text) & FS & (item k of tt) & FS & (item k of uu))\n"
     "      end repeat\n"
     "    end try\n"
     "  end repeat\n"
-    "  return outp\n"
-    "end tell"
+    "end tell\n"
+    "set AppleScript's text item delimiters to RS\n"
+    "set outp to acc as text\n"
+    'set AppleScript\'s text item delimiters to ""\n'
+    "return outp"
 )
+
+
+def _yesno(value: str) -> str:
+    """AppleScript booleans arrive as "true"/"false"; the CSV uses yes/no."""
+    v = (value or "").strip().lower()
+    return "yes" if v == "true" else ("no" if v == "false" else "")
 
 
 def _records(out: str):
@@ -116,8 +149,11 @@ def _records(out: str):
 
 
 def _chromium_gather(browser: tabcount.Browser) -> list[Tab]:
-    ok, out = tabcount._osascript(_CHROMIUM_SCRIPT.format(app=browser.name), timeout=20)
-    if not ok or not out:
+    ok, out = tabcount._osascript(_CHROMIUM_SCRIPT.format(app=browser.name),
+                                  timeout=GATHER_TIMEOUT)
+    if not ok:
+        raise ExportError(f"{browser.name}: {out or 'could not be read'}")
+    if not out:
         return []
     rows: list[Tab] = []
     for p in _records(out):
@@ -130,15 +166,17 @@ def _chromium_gather(browser: tabcount.Browser) -> list[Tab]:
         rows.append(Tab(
             browser=browser.name, window=wi, tab=ti,
             active="yes" if ti == atc else "no",
-            loading=p[4], window_mode=p[3],
+            loading=_yesno(p[4]), window_mode=p[3],
             title=p[5], url=p[6],
         ))
     return rows
 
 
 def _safari_gather(browser: tabcount.Browser) -> list[Tab]:
-    ok, out = tabcount._osascript(_SAFARI_SCRIPT, timeout=20)
-    if not ok or not out:
+    ok, out = tabcount._osascript(_SAFARI_SCRIPT, timeout=GATHER_TIMEOUT)
+    if not ok:
+        raise ExportError(f"{browser.name}: {out or 'could not be read'}")
+    if not out:
         return []
     rows: list[Tab] = []
     for p in _records(out):

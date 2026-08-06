@@ -114,8 +114,14 @@ def _osascript(script: str, timeout: float = 5) -> tuple[bool, str]:
     return True, proc.stdout.strip()
 
 
+# A browser with a very large number of tabs takes noticeably longer to answer
+# even a bulk `count of tabs` (measured ~3-4 s at 1600 tabs), so the default 5 s
+# left almost no headroom before the count silently failed. See issue #1.
+COUNT_TIMEOUT = 20
+
+
 def _count_via_applescript(app_name: str) -> tuple[int | None, str | None]:
-    ok, out = _osascript(_COUNT_SCRIPT.format(app=app_name))
+    ok, out = _osascript(_COUNT_SCRIPT.format(app=app_name), timeout=COUNT_TIMEOUT)
     if not ok:
         return None, out
     try:
@@ -281,7 +287,24 @@ def _count_via_firefox(app_support: str) -> tuple[int | None, str | None]:
 
 
 def running_process_names() -> set[str]:
-    """Lower-cased names of visible (non-background) processes currently running."""
+    """Lower-cased names of the applications currently running.
+
+    Prefers **NSWorkspace**, a local API call that needs no Automation
+    permission. The old System Events route was an Apple Event round-trip that
+    measured **~2.2 s** on a busy machine versus ~13 ms here — and since this
+    runs on every poll, that alone could make the app struggle to keep up with
+    its own timer (issue #1). System Events remains a fallback for the rare case
+    where PyObjC isn't available (e.g. plain-CLI use).
+    """
+    try:
+        from AppKit import NSWorkspace
+        apps = NSWorkspace.sharedWorkspace().runningApplications()
+        names = {str(a.localizedName() or "").strip().lower() for a in apps}
+        if names:
+            return names
+    except Exception:  # noqa: BLE001 - fall through to the AppleScript route
+        pass
+
     ok, out = _osascript(
         'tell application "System Events" to get name of '
         "(processes where background only is false)"

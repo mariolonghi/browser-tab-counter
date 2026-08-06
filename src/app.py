@@ -77,6 +77,7 @@ class TabCounterApp(rumps.App):
         super().__init__("⧉ …", quit_button=None)
         self._last_counts = []
         self._was_over = False        # threshold-crossing state (notify once)
+        self._refreshing = False      # guard: don't let slow polls stack up
         self._first_run_setup()       # default new installs to Launch-at-Login
         self._build_menu([], 0, first=True)
         self.timer = rumps.Timer(self.refresh, POLL_SECONDS)
@@ -393,6 +394,19 @@ class TabCounterApp(rumps.App):
     # ---- polling -----------------------------------------------------------
 
     def refresh(self, _sender=None) -> None:
+        # With a very large number of tabs a single poll can take longer than the
+        # poll interval. Without this guard the timer would keep firing on top of
+        # an in-flight refresh, pile up AppleScript calls and make the app appear
+        # to hang (issue #1). Skipping a tick is harmless; the next one catches up.
+        if self._refreshing:
+            return
+        self._refreshing = True
+        try:
+            self._refresh_once()
+        finally:
+            self._refreshing = False
+
+    def _refresh_once(self) -> None:
         counts = count_all()
         self._last_counts = counts
         total = total_tabs(counts)
