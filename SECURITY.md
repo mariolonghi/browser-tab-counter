@@ -12,6 +12,9 @@ it between you and me until there's a fix. You don't need my email address.
 *Can't use the form? Open a public issue saying only that you've found a
 security problem and want a private channel. No details. I'll open one.*
 
+No GitHub account? Email **browser-tab-counter@mariolonghi.com** instead.
+
+
 ### What to send
 
 - What an attacker could do, and what they'd need first
